@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "时间轴书签",
+  "version": "1.0.0",
+  "description": "重新定义你的书签体验 —— 时间轴视图、分页加载与美观主题，让每一条书签都井然有序、赏心悦目。",
+  "permissions": [
+    "bookmarks",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "时间轴书签",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
