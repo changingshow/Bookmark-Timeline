@@ -43,7 +43,7 @@ class BookmarkManager {
     // 主题切换
     this.elements.themeToggle.addEventListener('click', () => this.toggleTheme());
     
-    // 滚动条设置
+    // 颜色设置
     this.elements.scrollbarSettings.addEventListener('click', () => this.toggleScrollbarPanel());
     
     // 按钮颜色预设点击
