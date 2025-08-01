@@ -41,7 +41,7 @@
 
 1. **下载源码**
    ```bash
-   git clone https://github.com/your-username/smart-bookmark-manager.git
+   git clone https://github.com/changingshow/Bookmark-Timeline.git
    cd smart-bookmark-manager
    ```
 
@@ -169,7 +169,7 @@ smart-bookmark-manager/
 
 1. **克隆项目**
    ```bash
-   git clone https://github.com/your-username/smart-bookmark-manager.git
+   git clone https://github.com/changingshow/Bookmark-Timeline.git
    cd smart-bookmark-manager
    ```
 
@@ -249,8 +249,8 @@ A: 确保图标文件存在且路径正确，检查网络连接。
 
 ## 📞 联系方式
 
-- 项目主页: https://github.com/your-username/smart-bookmark-manager
-- 问题反馈: https://github.com/your-username/smart-bookmark-manager/issues
+- 项目主页: https://github.com/changingshow/Bookmark-Timeline
+- 问题反馈: https://github.com/changingshow/Bookmark-Timeline/issues
 - 邮箱: your-email@example.com
 
 ---

@@ -651,7 +651,7 @@ class BookmarkManager {
 
   async openGitHub() {
     try {
-      await chrome.tabs.create({ url: 'https://github.com/your-username/smart-bookmark-manager' });
+      await chrome.tabs.create({ url: 'https://github.com/changingshow/Bookmark-Timeline' });
     } catch (error) {
       console.error('打开GitHub页面失败:', error);
     }
