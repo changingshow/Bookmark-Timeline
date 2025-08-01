@@ -1,6 +1,7 @@
 # 时间轴书签 Chrome 扩展
 
 一个现代化的Chrome浏览器扩展，提供优雅的书签管理体验，支持分页加载、实时搜索、主题切换等功能。
+![alt text](image-2.png)
 
 ## ✨ 主要特性
 
@@ -219,7 +220,7 @@ A: 确保图标文件存在且路径正确，检查网络连接。
 
 ## 📝 更新日志
 
-### v1.0.0 (2024-01-01)
+### v1.0.0 (2025-08-01)
 - 🎉 初始版本发布
 - ✨ 基础书签显示功能
 - 🔍 实时搜索功能
@@ -251,7 +252,6 @@ A: 确保图标文件存在且路径正确，检查网络连接。
 
 - 项目主页: https://github.com/changingshow/Bookmark-Timeline
 - 问题反馈: https://github.com/changingshow/Bookmark-Timeline/issues
-- 邮箱: your-email@example.com
 
 ---
 
