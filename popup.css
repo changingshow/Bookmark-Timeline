@@ -13,12 +13,10 @@
   --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
   --accent-color: #667eea;
   --success-color: #48bb78;
-  --warning-color: #ed8936;
   --scrollbar-track: rgba(0, 0, 0, 0.05);
   --scrollbar-thumb: rgba(0, 0, 0, 0.2);
   --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
   --button-color: #667eea;
-  /* --header-gradient: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); */
 }
 
 /* 深色主题 */
@@ -103,15 +101,13 @@ body {
   gap: 8px;
 }
 
-.github-button,
-.theme-toggle,
-.search-toggle {
+/* 通用按钮样式 */
+.header-button {
   width: 32px;
   height: 32px;
-  border: none;
-  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
+  background: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -121,17 +117,13 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.github-button:hover,
-.theme-toggle:hover,
-.search-toggle:hover {
+.header-button:hover {
   background: var(--bg-hover);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.github-icon,
-.theme-icon,
-.search-icon {
+.header-button svg {
   width: 16px;
   height: 16px;
 }
@@ -203,33 +195,7 @@ body {
   position: relative;
 }
 
-/* 滚动条设置按钮 */
-.scrollbar-settings {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--text-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.scrollbar-settings:hover {
-  background: var(--bg-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.scrollbar-icon {
-  width: 16px;
-  height: 16px;
-}
+/* 滚动条设置按钮继承通用按钮样式 */
 
 /* 滚动条设置面板 */
 .scrollbar-panel {
@@ -499,6 +465,8 @@ body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative; /* 为加载动画提供定位基准 */
+  overflow: hidden; /* 确保内容不会溢出 */
 }
 
 [data-theme="dark"] .bookmark-icon-wrapper {
@@ -525,28 +493,65 @@ body {
   object-fit: cover;
 }
 
-/* 特定网站图标样式 */
-.bookmark-icon.immersive {
-  background-color: #ff4e8b;
-  border-color: #ff4e8b;
+
+
+/* 首字母图标容器 */
+.site-initial-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.bookmark-icon.baidu {
-  background-color: #4e6ef2;
-  border-color: #4e6ef2;
-}
-
-.bookmark-icon.linux {
-  background-color: #333;
-  border-color: #333;
-}
-
-/* 网站图标内部的文字样式 */
-.bookmark-icon .site-initial {
-  color: #fff;
-  font-size: 10px;
-  font-weight: bold;
+/* 首字母文字 */
+.site-initial-icon .site-initial {
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
   text-transform: uppercase;
+}
+
+/* 图标状态样式 */
+.bookmark-icon.fallback,
+.bookmark-icon.success {
+  background: transparent;
+}
+
+/* 加载状态动画 - 在外层容器中心显示 */
+.bookmark-icon-wrapper.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+/* 深色主题下的加载动画 */
+[data-theme="dark"] .bookmark-icon-wrapper.loading::before {
+  border: 2px solid #4a5568;
+  border-top: 2px solid var(--accent-color);
+}
+
+/* 加载时隐藏内部内容 */
+.bookmark-icon.loading {
+  opacity: 0;
 }
 
 .bookmark-content {
@@ -571,14 +576,15 @@ body {
   line-height: 1.1;
 }
 
-.bookmark-url, .bookmark-date {
+.bookmark-url,
+.bookmark-date {
   display: inline;
+  white-space: nowrap;
 }
 
 .bookmark-url {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .bookmark-separator {
@@ -589,10 +595,6 @@ body {
   border-radius: 50%;
   margin: 0 4px;
   vertical-align: middle;
-}
-
-.bookmark-date {
-  white-space: nowrap;
 }
 
 /* 加载指示器 */
@@ -717,12 +719,7 @@ body {
 
 
 
-/* 深色主题下的快捷键样式调整 */
-[data-theme="dark"] .key {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
+
 
 /* 隐藏状态 */
 .hidden {
@@ -753,10 +750,7 @@ body {
   }
 }
 
-/* 简单的动画效果 */
-.bookmark-item {
-  opacity: 1;
-}
+
 
 /* 搜索结果高亮 */
 .bookmark-title .highlight {

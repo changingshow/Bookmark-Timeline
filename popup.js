@@ -7,8 +7,7 @@ class BookmarkManager {
     this.isLoading = false;
     this.hasMoreData = true;
     this.searchQuery = '';
-    this.isSearchMode = false;
-    
+
     this.initializeElements();
     this.bindEvents();
     this.initializeTheme();
@@ -118,12 +117,12 @@ class BookmarkManager {
   }
 
   updateThemeIcon(theme) {
-    const icon = this.elements.themeToggle.querySelector('.theme-icon');
-    if (theme === 'dark') {
-      icon.innerHTML = '<path d="M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.39,5.42C13.65,5.15 12.84,5 12,5C11.16,5 10.35,5.15 9.61,5.42L12,2M3.34,7L7.5,6.65C6.9,7.16 6.36,7.78 5.94,8.5C5.52,9.22 5.25,10 5.11,10.79L3.34,7M3.36,17L5.12,13.23C5.26,14 5.53,14.78 5.95,15.5C6.37,16.22 6.91,16.84 7.51,17.35L3.36,17M20.65,7L18.88,10.79C18.74,10 18.47,9.22 18.05,8.5C17.63,7.78 17.09,7.15 16.49,6.65L20.65,7M20.64,17L16.5,17.35C17.1,16.84 17.64,16.22 18.06,15.5C18.48,14.78 18.75,14 18.89,13.23L20.64,17Z"/>';
-    } else {
-      icon.innerHTML = '<path d="M12,18C11.11,18 10.26,17.8 9.5,17.45C11.56,16.5 13,14.42 13,12C13,9.58 11.56,7.5 9.5,6.55C10.26,6.2 11.11,6 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31L23.31,12L20,8.69Z"/>';
-    }
+    const icon = this.elements.themeToggle.querySelector('svg');
+    const paths = {
+      dark: 'M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.39,5.42C13.65,5.15 12.84,5 12,5C11.16,5 10.35,5.15 9.61,5.42L12,2M3.34,7L7.5,6.65C6.9,7.16 6.36,7.78 5.94,8.5C5.52,9.22 5.25,10 5.11,10.79L3.34,7M3.36,17L5.12,13.23C5.26,14 5.53,14.78 5.95,15.5C6.37,16.22 6.91,16.84 7.51,17.35L3.36,17M20.65,7L18.88,10.79C18.74,10 18.47,9.22 18.05,8.5C17.63,7.78 17.09,7.15 16.49,6.65L20.65,7M20.64,17L16.5,17.35C17.1,16.84 17.64,16.22 18.06,15.5C18.48,14.78 18.75,14 18.89,13.23L20.64,17Z',
+      light: 'M12,18C11.11,18 10.26,17.8 9.5,17.45C11.56,16.5 13,14.42 13,12C13,9.58 11.56,7.5 9.5,6.55C10.26,6.2 11.11,6 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31L23.31,12L20,8.69Z'
+    };
+    icon.innerHTML = `<path d="${paths[theme] || paths.light}"/>`;
   }
 
   toggleScrollbarPanel() {
@@ -157,14 +156,7 @@ class BookmarkManager {
   }
 
   updateButtonColorUI(colorName) {
-    const presets = document.querySelectorAll('.button-color-preset');
-    presets.forEach(preset => {
-      if (preset.dataset.color === colorName) {
-        preset.classList.add('active');
-      } else {
-        preset.classList.remove('active');
-      }
-    });
+    this.updateColorUI('.button-color-preset', colorName);
   }
 
   async setScrollbarColor(colorName) {
@@ -231,13 +223,14 @@ class BookmarkManager {
   }
 
   updateScrollbarColorUI(colorName) {
-    const presets = document.querySelectorAll('.scrollbar-color-preset');
+    this.updateColorUI('.scrollbar-color-preset', colorName);
+  }
+
+  // 通用的颜色UI更新方法
+  updateColorUI(selector, colorName) {
+    const presets = document.querySelectorAll(selector);
     presets.forEach(preset => {
-      if (preset.dataset.color === colorName) {
-        preset.classList.add('active');
-      } else {
-        preset.classList.remove('active');
-      }
+      preset.classList.toggle('active', preset.dataset.color === colorName);
     });
   }
 
@@ -486,29 +479,63 @@ class BookmarkManager {
   createBookmarkIcon(url) {
     // 创建外层灰色圆角矩形容器
     const iconWrapper = document.createElement('div');
-    iconWrapper.className = 'bookmark-icon-wrapper';
+    iconWrapper.className = 'bookmark-icon-wrapper loading'; // 同时添加loading类
 
     // 创建内层图标容器
     const iconContainer = document.createElement('div');
     iconContainer.className = 'bookmark-icon loading';
 
+    // 解析URL获取域名和网站名称
+    let hostname, siteName;
+    try {
+      const urlObj = new URL(url);
+      hostname = urlObj.hostname;
+      siteName = hostname.replace(/^www\./, ''); // 移除www前缀
+    } catch (e) {
+      hostname = 'unknown';
+      siteName = 'unknown';
+    }
+
     const img = document.createElement('img');
-    const faviconUrl = `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=32`;
+    const faviconUrl = `https://www.1google.com/s2/favicons?domain=${hostname}&sz=32`;
 
+    // 设置加载超时时间（毫秒）
+    const LOAD_TIMEOUT = 5000;
+    let isLoaded = false;
+    let timeoutId;
+
+    // 成功加载处理
     img.onload = () => {
-      iconContainer.classList.remove('loading');
-      iconContainer.classList.remove('error');
+      if (!isLoaded) {
+        isLoaded = true;
+        clearTimeout(timeoutId);
+        iconWrapper.classList.remove('loading'); // 移除wrapper的loading类
+        iconContainer.classList.remove('loading');
+        iconContainer.classList.remove('error');
+        iconContainer.classList.add('success');
+      }
     };
 
+    // 加载失败处理
     img.onerror = () => {
-      iconContainer.classList.remove('loading');
-      iconContainer.classList.add('error');
-      iconContainer.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z"/>
-        </svg>
-      `;
+      if (!isLoaded) {
+        isLoaded = true;
+        clearTimeout(timeoutId);
+        iconWrapper.classList.remove('loading'); // 移除wrapper的loading类
+        this.showFallbackIcon(iconContainer, siteName);
+      }
     };
+
+    // 超时处理
+    timeoutId = setTimeout(() => {
+      if (!isLoaded) {
+        isLoaded = true;
+        // 停止图片加载
+        img.src = '';
+        iconWrapper.classList.remove('loading'); // 移除wrapper的loading类
+        this.showFallbackIcon(iconContainer, siteName);
+      }
+    }, LOAD_TIMEOUT);
 
     img.src = faviconUrl;
     img.alt = '网站图标';
@@ -518,6 +545,53 @@ class BookmarkManager {
     iconWrapper.appendChild(iconContainer);
 
     return iconWrapper;
+  }
+
+  // 显示降级图标（网站首字母）
+  showFallbackIcon(iconContainer, siteName) {
+    iconContainer.classList.remove('loading');
+    iconContainer.classList.add('fallback');
+    
+    // 获取网站首字母
+    const initial = this.getSiteInitial(siteName);
+    
+    // 生成颜色（根据域名生成一致的颜色）
+    const bgColor = this.generateColorFromText(siteName);
+    
+    iconContainer.innerHTML = `
+      <div class="site-initial-icon" style="background-color: ${bgColor}">
+        <span class="site-initial">${initial}</span>
+      </div>
+    `;
+  }
+
+  // 获取网站首字母
+  getSiteInitial(siteName) {
+    const customInitials = {
+      'github.com': 'G', 'stackoverflow.com': 'SO', 'google.com': 'G',
+      'baidu.com': '百', 'zhihu.com': '知', 'bilibili.com': 'B',
+      'youtube.com': 'Y', 'twitter.com': 'T', 'facebook.com': 'F',
+      'linkedin.com': 'in'
+    };
+
+    return customInitials[siteName] || siteName.split('.')[0].charAt(0).toUpperCase();
+  }
+
+  // 根据文本生成一致的颜色
+  generateColorFromText(text) {
+    const colors = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+      '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+      '#F8C471', '#82E0AA', '#F1948A', '#D2B4DE'
+    ];
+
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      hash = ((hash << 5) - hash) + text.charCodeAt(i);
+      hash = hash & hash;
+    }
+
+    return colors[Math.abs(hash) % colors.length];
   }
 
   createBookmarkContent(bookmark) {
