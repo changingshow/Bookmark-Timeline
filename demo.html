@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主题颜色设置改进演示</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .demo-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .before, .after {
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .before {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+        
+        .after {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .before .section-title {
+            color: #dc2626;
+        }
+        
+        .after .section-title {
+            color: #16a34a;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .highlight {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .benefits {
+            margin-top: 30px;
+            padding: 20px;
+            background: #eff6ff;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .benefits h3 {
+            color: #1e40af;
+            margin-top: 0;
+        }
+        
+        .benefits ul {
+            color: #1e3a8a;
+        }
+        
+        .demo-image {
+            width: 100%;
+            max-width: 300px;
+            margin: 15px auto;
+            display: block;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 class="demo-title">🎨 主题颜色设置改进方案</h1>
+        
+        <div class="highlight">
+            <strong>改进目标：</strong>将原来的两个独立颜色设置（底部按钮颜色 + 滚动条颜色）合并为一个统一的主题颜色设置，让多个UI元素协调一致地变化。
+        </div>
+        
+        <div class="comparison">
+            <div class="before">
+                <h2 class="section-title">❌ 改进前</h2>
+                <ul class="feature-list">
+                    <li><strong>设置项：</strong>底部按钮颜色</li>
+                    <li><strong>影响元素：</strong>仅底部按钮</li>
+                    <li><strong>设置项：</strong>滚动条颜色</li>
+                    <li><strong>影响元素：</strong>仅右侧滚动条</li>
+                    <li><strong>用户操作：</strong>需要分别设置两个颜色</li>
+                    <li><strong>一致性：</strong>可能出现颜色不协调</li>
+                </ul>
+            </div>
+            
+            <div class="after">
+                <h2 class="section-title">✅ 改进后</h2>
+                <ul class="feature-list">
+                    <li><strong>设置项：</strong>主题颜色</li>
+                    <li><strong>影响元素：</strong>底部按钮</li>
+                    <li><strong>影响元素：</strong>书签图标加载动画</li>
+                    <li><strong>影响元素：</strong>右侧滚动条</li>
+                    <li><strong>影响元素：</strong>加载指示器动画</li>
+                    <li><strong>用户操作：</strong>一次设置，多处生效</li>
+                    <li><strong>一致性：</strong>所有元素颜色协调统一</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="benefits">
+            <h3>🚀 改进带来的优势</h3>
+            <ul>
+                <li><strong>用户体验更简洁：</strong>只需要选择一次颜色，而不是分别设置多个颜色</li>
+                <li><strong>视觉一致性更好：</strong>所有相关元素使用同一主题色，界面更协调美观</li>
+                <li><strong>操作更便捷：</strong>减少了用户的选择负担和认知成本</li>
+                <li><strong>设计更专业：</strong>统一的主题色系让扩展看起来更加专业和精致</li>
+                <li><strong>维护更简单：</strong>代码结构更清晰，后续维护和扩展更容易</li>
+            </ul>
+        </div>
+        
+        <div class="highlight">
+            <strong>技术实现：</strong>
+            <br>• 将原来的 <code>buttonColor</code> 和 <code>scrollbarColor</code> 合并为 <code>themeColor</code>
+            <br>• 统一使用 <code>--button-color</code> CSS变量控制所有相关元素
+            <br>• 简化设置面板UI，提供更清晰的用户引导
+        </div>
+    </div>
+</body>
+</html>

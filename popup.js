@@ -27,7 +27,7 @@ class BookmarkManager {
       githubButton: document.getElementById('githubButton'),
       themeToggle: document.getElementById('themeToggle'),
       scrollbarSettings: document.getElementById('scrollbarSettings'),
-      scrollbarPanel: document.getElementById('scrollbarPanel'),
+      themePanel: document.getElementById('themePanel'),
       searchContainer: document.getElementById('searchContainer'),
       searchInput: document.getElementById('searchInput'),
       searchClear: document.getElementById('searchClear'),
@@ -42,19 +42,13 @@ class BookmarkManager {
     // 主题切换
     this.elements.themeToggle.addEventListener('click', () => this.toggleTheme());
     
-    // 颜色设置
-    this.elements.scrollbarSettings.addEventListener('click', () => this.toggleScrollbarPanel());
-    
-    // 按钮颜色预设点击
-    const buttonColorPresets = document.querySelectorAll('.button-color-preset');
-    buttonColorPresets.forEach(preset => {
-      preset.addEventListener('click', () => this.setButtonColor(preset.dataset.color));
-    });
-    
-    // 滚动条颜色预设点击
-    const scrollbarColorPresets = document.querySelectorAll('.scrollbar-color-preset');
-    scrollbarColorPresets.forEach(preset => {
-      preset.addEventListener('click', () => this.setScrollbarColor(preset.dataset.color));
+    // 主题颜色设置
+    this.elements.scrollbarSettings.addEventListener('click', () => this.toggleThemePanel());
+
+    // 主题颜色预设点击
+    const themeColorPresets = document.querySelectorAll('.theme-color-preset');
+    themeColorPresets.forEach(preset => {
+      preset.addEventListener('click', () => this.setThemeColor(preset.dataset.color));
     });
     
     // 搜索功能
@@ -86,17 +80,14 @@ class BookmarkManager {
 
   async initializeTheme() {
     try {
-      const result = await chrome.storage.sync.get(['theme', 'buttonColor', 'scrollbarColor']);
+      const result = await chrome.storage.sync.get(['theme', 'themeColor']);
       const theme = result.theme || 'light';
-      const buttonColor = result.buttonColor || 'blue';
-      const scrollbarColor = result.scrollbarColor || 'blue';
-      
+      const themeColor = result.themeColor || 'blue';
+
       document.documentElement.setAttribute('data-theme', theme);
       this.updateThemeIcon(theme);
-      this.setButtonColor(buttonColor);
-      this.updateButtonColorUI(buttonColor);
-      this.setScrollbarColor(scrollbarColor);
-      this.updateScrollbarColorUI(scrollbarColor);
+      this.setThemeColor(themeColor);
+      this.updateThemeColorUI(themeColor);
     } catch (error) {
       console.error('初始化主题失败:', error);
     }
@@ -125,11 +116,11 @@ class BookmarkManager {
     icon.innerHTML = `<path d="${paths[theme] || paths.light}"/>`;
   }
 
-  toggleScrollbarPanel() {
-    this.elements.scrollbarPanel.classList.toggle('active');
+  toggleThemePanel() {
+    this.elements.themePanel.classList.toggle('active');
   }
 
-  async setButtonColor(colorName) {
+  async setThemeColor(colorName) {
     const colorMap = {
       red: '#ef4444',      // 赤
       orange: '#f97316',   // 橙
@@ -142,24 +133,27 @@ class BookmarkManager {
 
     const color = colorMap[colorName] || colorMap.blue;
     const root = document.documentElement;
-    
-    // 只设置按钮颜色CSS变量
+
+    // 设置主题颜色CSS变量，影响多个元素
     root.style.setProperty('--button-color', color);
-    
-    this.updateButtonColorUI(colorName);
-    
+
+    // 设置滚动条颜色
+    this.setScrollbarColorByTheme(colorName);
+
+    this.updateThemeColorUI(colorName);
+
     try {
-      await chrome.storage.sync.set({ buttonColor: colorName });
+      await chrome.storage.sync.set({ themeColor: colorName });
     } catch (error) {
-      console.error('保存按钮颜色设置失败:', error);
+      console.error('保存主题颜色设置失败:', error);
     }
   }
 
-  updateButtonColorUI(colorName) {
-    this.updateColorUI('.button-color-preset', colorName);
+  updateThemeColorUI(colorName) {
+    this.updateColorUI('.theme-color-preset', colorName);
   }
 
-  async setScrollbarColor(colorName) {
+  setScrollbarColorByTheme(colorName) {
     const colorMap = {
       red: {        // 赤
         track: 'rgba(239, 68, 68, 0.1)',
@@ -200,7 +194,7 @@ class BookmarkManager {
 
     const colors = colorMap[colorName] || colorMap.blue;
     const root = document.documentElement;
-    
+
     // 深色主题需要调整颜色
     const currentTheme = root.getAttribute('data-theme');
     if (currentTheme === 'dark') {
@@ -208,22 +202,10 @@ class BookmarkManager {
       colors.thumb = colors.thumb.replace('0.6', '0.4');
       colors.thumbHover = colors.thumbHover.replace('0.8', '0.6');
     }
-    
+
     root.style.setProperty('--scrollbar-track', colors.track);
     root.style.setProperty('--scrollbar-thumb', colors.thumb);
     root.style.setProperty('--scrollbar-thumb-hover', colors.thumbHover);
-    
-    this.updateScrollbarColorUI(colorName);
-    
-    try {
-      await chrome.storage.sync.set({ scrollbarColor: colorName });
-    } catch (error) {
-      console.error('保存滚动条颜色设置失败:', error);
-    }
-  }
-
-  updateScrollbarColorUI(colorName) {
-    this.updateColorUI('.scrollbar-color-preset', colorName);
   }
 
   // 通用的颜色UI更新方法

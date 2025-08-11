@@ -190,15 +190,15 @@ body {
   height: 14px;
 }
 
-/* 滚动条设置容器 */
+/* 主题颜色设置容器 */
 .scrollbar-settings-container {
   position: relative;
 }
 
-/* 滚动条设置按钮继承通用按钮样式 */
+/* 主题颜色设置按钮继承通用按钮样式 */
 
-/* 滚动条设置面板 */
-.scrollbar-panel {
+/* 主题颜色设置面板 */
+.theme-panel {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
@@ -215,7 +215,7 @@ body {
   z-index: 9999;
 }
 
-.scrollbar-panel.active {
+.theme-panel.active {
   opacity: 1;
   transform: translateY(0);
   pointer-events: all;
@@ -283,6 +283,19 @@ body {
 
 .color-preset.active::after {
   opacity: 1;
+}
+
+/* 主题描述文字 */
+.theme-description {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.theme-description span {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
 }
 
 
