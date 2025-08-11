@@ -536,7 +536,7 @@ body {
   height: 16px;
   margin: auto;
   border: 2px solid #e2e8f0;
-  border-top: 2px solid var(--accent-color);
+  border-top: 2px solid var(--button-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   z-index: 10;
@@ -546,7 +546,7 @@ body {
 /* 深色主题下的加载动画 */
 [data-theme="dark"] .bookmark-icon-wrapper.loading::before {
   border: 2px solid #4a5568;
-  border-top: 2px solid var(--accent-color);
+  border-top: 2px solid var(--button-color);
 }
 
 /* 加载时隐藏内部内容 */
@@ -616,7 +616,7 @@ body {
   width: 22px;
   height: 22px;
   border: 2px solid #e2e8f0;
-  border-top: 2px solid var(--accent-color);
+  border-top: 2px solid var(--button-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
