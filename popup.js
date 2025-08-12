@@ -484,10 +484,10 @@ class BookmarkManager {
     }
 
     const img = document.createElement('img');
-    const faviconUrl = `https://www.1google.com/s2/favicons?domain=${hostname}&sz=32`;
+    const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
 
     // 设置加载超时时间（毫秒）
-    const LOAD_TIMEOUT = 5000;
+    const LOAD_TIMEOUT = 500;
     let isLoaded = false;
     let timeoutId;
 
@@ -671,7 +671,7 @@ class BookmarkManager {
     this.elements.loadingIndicator.classList.remove('hidden');
     
     // 模拟加载延迟
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     this.renderBookmarks();
     
