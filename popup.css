@@ -17,6 +17,7 @@
   --scrollbar-thumb: rgba(0, 0, 0, 0.2);
   --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
   --button-color: #667eea;
+  --title-color: #667eea;
 }
 
 /* 深色主题 */
@@ -88,7 +89,7 @@ body {
   gap: 8px;
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--title-color);
 }
 
 .title-icon {

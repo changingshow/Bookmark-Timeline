@@ -26,7 +26,7 @@ class BookmarkManager {
       emptyState: document.getElementById('emptyState'),
       githubButton: document.getElementById('githubButton'),
       themeToggle: document.getElementById('themeToggle'),
-      scrollbarSettings: document.getElementById('scrollbarSettings'),
+      themeSettings: document.getElementById('themeSettings'),
       themePanel: document.getElementById('themePanel'),
       searchContainer: document.getElementById('searchContainer'),
       searchInput: document.getElementById('searchInput'),
@@ -43,7 +43,7 @@ class BookmarkManager {
     this.elements.themeToggle.addEventListener('click', () => this.toggleTheme());
     
     // 主题颜色设置
-    this.elements.scrollbarSettings.addEventListener('click', () => this.toggleThemePanel());
+    this.elements.themeSettings.addEventListener('click', () => this.toggleThemePanel());
 
     // 主题颜色预设点击
     const themeColorPresets = document.querySelectorAll('.theme-color-preset');
@@ -71,9 +71,9 @@ class BookmarkManager {
     
     // 点击外部关闭面板
     document.addEventListener('click', (e) => {
-      if (!this.elements.scrollbarSettings.contains(e.target) && 
-          !this.elements.scrollbarPanel.contains(e.target)) {
-        this.elements.scrollbarPanel.classList.remove('active');
+      if (!this.elements.themeSettings.contains(e.target) &&
+          !this.elements.themePanel.contains(e.target)) {
+        this.elements.themePanel.classList.remove('active');
       }
     });
   }
@@ -136,6 +136,7 @@ class BookmarkManager {
 
     // 设置主题颜色CSS变量，影响多个元素
     root.style.setProperty('--button-color', color);
+    root.style.setProperty('--title-color', color);
 
     // 设置滚动条颜色
     this.setScrollbarColorByTheme(colorName);
