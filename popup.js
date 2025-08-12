@@ -31,7 +31,8 @@ class BookmarkManager {
       searchContainer: document.getElementById('searchContainer'),
       searchInput: document.getElementById('searchInput'),
       searchClear: document.getElementById('searchClear'),
-      managerButton: document.getElementById('managerButton')
+      managerButton: document.getElementById('managerButton'),
+      backToTop: document.getElementById('backToTop')
     };
   }
 
@@ -65,6 +66,9 @@ class BookmarkManager {
     
     // 打开书签管理器
     this.elements.managerButton.addEventListener('click', () => this.openBookmarkManager());
+
+    // 回到顶部按钮
+    this.elements.backToTop.addEventListener('click', () => this.scrollToTop());
 
     // 键盘导航
     document.addEventListener('keydown', (e) => this.handleKeyNavigation(e));
@@ -656,11 +660,14 @@ class BookmarkManager {
     const scrollTop = container.scrollTop;
     const scrollHeight = container.scrollHeight;
     const clientHeight = container.clientHeight;
-    
+
     // 当滚动到底部附近时加载更多
     if (scrollTop + clientHeight >= scrollHeight - 100 && !this.isLoading && this.hasMoreData) {
       this.loadMoreBookmarks();
     }
+
+    // 控制回到顶部按钮的显示/隐藏
+    this.toggleBackToTopButton(scrollTop);
   }
 
 
@@ -671,7 +678,7 @@ class BookmarkManager {
     this.elements.loadingIndicator.classList.remove('hidden');
     
     // 模拟加载延迟
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
     this.renderBookmarks();
     
@@ -800,6 +807,34 @@ class BookmarkManager {
     const b = parseInt(hex.substring(4, 6), 16);
 
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  // 控制回到顶部按钮的显示/隐藏
+  toggleBackToTopButton(scrollTop) {
+    const showThreshold = 200; // 滚动超过200px时显示按钮
+
+    // 清除之前的定时器
+    if (this.backToTopTimer) {
+      clearTimeout(this.backToTopTimer);
+    }
+
+    // 使用防抖，避免在平滑滚动过程中频繁切换
+    this.backToTopTimer = setTimeout(() => {
+      if (scrollTop > showThreshold) {
+        this.elements.backToTop.classList.add('visible');
+      } else {
+        this.elements.backToTop.classList.remove('visible');
+      }
+    }, 50); // 50ms防抖延迟
+  }
+
+  // 回到顶部功能
+  scrollToTop() {
+    const container = this.elements.bookmarksContainer;
+    container.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 }
 

@@ -736,6 +736,50 @@ body {
 
 
 
+/* 回到顶部按钮 */
+.back-to-top {
+  position: absolute;
+  bottom: 70px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: var(--button-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(50px);
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+.back-to-top.visible:hover {
+  transform: translateX(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.1);
+}
+
+.back-to-top.visible:active {
+  transform: translateX(0) scale(0.95);
+}
+
+.back-to-top svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* 隐藏状态 */
 .hidden {
   display: none !important;
