@@ -126,13 +126,20 @@ class BookmarkManager {
 
   async setThemeColor(colorName) {
     const colorMap = {
-      red: '#ef4444',      // 赤
-      orange: '#f97316',   // 橙
-      yellow: '#eab308',   // 黄
-      green: '#22c55e',    // 绿
-      cyan: '#06b6d4',     // 青
-      blue: '#3b82f6',     // 蓝
-      purple: '#8b5cf6'    // 紫
+      // 赤
+      red: '#ef4444',
+      // 橙
+      orange: '#f97316',
+      // 黄
+      yellow: '#eab308',
+      // 绿
+      green: '#22c55e',
+      // 青
+      cyan: '#06b6d4',
+      // 蓝
+      blue: '#3b82f6',
+      // 紫
+      purple: '#8b5cf6'
     };
 
     const color = colorMap[colorName] || colorMap.blue;
@@ -164,37 +171,44 @@ class BookmarkManager {
 
   setScrollbarColorByTheme(colorName) {
     const colorMap = {
-      red: {        // 赤
+      // 赤
+      red: {
         track: 'rgba(239, 68, 68, 0.1)',
         thumb: 'rgba(239, 68, 68, 0.6)',
         thumbHover: 'rgba(220, 38, 38, 0.8)'
       },
-      orange: {     // 橙
+      // 橙
+      orange: {
         track: 'rgba(249, 115, 22, 0.1)',
         thumb: 'rgba(249, 115, 22, 0.6)',
         thumbHover: 'rgba(234, 88, 12, 0.8)'
       },
-      yellow: {     // 黄
+      // 黄
+      yellow: {
         track: 'rgba(234, 179, 8, 0.1)',
         thumb: 'rgba(234, 179, 8, 0.6)',
         thumbHover: 'rgba(202, 138, 4, 0.8)'
       },
-      green: {      // 绿
+      // 绿
+      green: {
         track: 'rgba(34, 197, 94, 0.1)',
         thumb: 'rgba(34, 197, 94, 0.6)',
         thumbHover: 'rgba(22, 163, 74, 0.8)'
       },
-      cyan: {       // 青
+      // 青
+      cyan: {
         track: 'rgba(6, 182, 212, 0.1)',
         thumb: 'rgba(6, 182, 212, 0.6)',
         thumbHover: 'rgba(8, 145, 178, 0.8)'
       },
-      blue: {       // 蓝
+      // 蓝
+      blue: {
         track: 'rgba(59, 130, 246, 0.1)',
         thumb: 'rgba(59, 130, 246, 0.6)',
         thumbHover: 'rgba(37, 99, 235, 0.8)'
       },
-      purple: {     // 紫
+      // 紫
+      purple: {
         track: 'rgba(139, 92, 246, 0.1)',
         thumb: 'rgba(139, 92, 246, 0.6)',
         thumbHover: 'rgba(124, 58, 237, 0.8)'
@@ -470,7 +484,8 @@ class BookmarkManager {
   createBookmarkIcon(url) {
     // 创建外层灰色圆角矩形容器
     const iconWrapper = document.createElement('div');
-    iconWrapper.className = 'bookmark-icon-wrapper loading'; // 同时添加loading类
+    // 同时添加loading类
+    iconWrapper.className = 'bookmark-icon-wrapper loading';
 
     // 创建内层图标容器
     const iconContainer = document.createElement('div');
@@ -481,7 +496,8 @@ class BookmarkManager {
     try {
       const urlObj = new URL(url);
       hostname = urlObj.hostname;
-      siteName = hostname.replace(/^www\./, ''); // 移除www前缀
+      // 移除www前缀
+      siteName = hostname.replace(/^www\./, '');
     } catch (e) {
       hostname = 'unknown';
       siteName = 'unknown';
@@ -500,7 +516,8 @@ class BookmarkManager {
       if (!isLoaded) {
         isLoaded = true;
         clearTimeout(timeoutId);
-        iconWrapper.classList.remove('loading'); // 移除wrapper的loading类
+        // 移除wrapper的loading类
+        iconWrapper.classList.remove('loading');
         iconContainer.classList.remove('loading');
         iconContainer.classList.remove('error');
         iconContainer.classList.add('success');
@@ -512,7 +529,8 @@ class BookmarkManager {
       if (!isLoaded) {
         isLoaded = true;
         clearTimeout(timeoutId);
-        iconWrapper.classList.remove('loading'); // 移除wrapper的loading类
+        // 移除wrapper的loading类
+        iconWrapper.classList.remove('loading');
         this.showFallbackIcon(iconContainer, siteName);
       }
     };
@@ -523,7 +541,8 @@ class BookmarkManager {
         isLoaded = true;
         // 停止图片加载
         img.src = '';
-        iconWrapper.classList.remove('loading'); // 移除wrapper的loading类
+        // 移除wrapper的loading类
+        iconWrapper.classList.remove('loading');
         this.showFallbackIcon(iconContainer, siteName);
       }
     }, LOAD_TIMEOUT);
@@ -811,7 +830,8 @@ class BookmarkManager {
 
   // 控制回到顶部按钮的显示/隐藏
   toggleBackToTopButton(scrollTop) {
-    const showThreshold = 200; // 滚动超过200px时显示按钮
+    // 滚动超过200px时显示按钮
+    const showThreshold = 200;
 
     // 清除之前的定时器
     if (this.backToTopTimer) {
@@ -825,7 +845,8 @@ class BookmarkManager {
       } else {
         this.elements.backToTop.classList.remove('visible');
       }
-    }, 50); // 50ms防抖延迟
+    // 50ms防抖延迟
+    }, 50);
   }
 
   // 回到顶部功能

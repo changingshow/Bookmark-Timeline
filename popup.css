@@ -93,10 +93,7 @@ body {
   color: var(--title-color);
 }
 
-.title-icon {
-  width: 20px;
-  height: 20px;
-}
+
 
 .header-actions {
   display: flex;
@@ -197,7 +194,7 @@ body {
   position: relative;
 }
 
-/* 主题颜色设置按钮继承通用按钮样式 */
+
 
 /* 主题颜色设置面板 */
 .theme-panel {
@@ -261,12 +258,7 @@ body {
   margin-bottom: 8px;
 }
 
-.color-group label {
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-  display: block;
-}
+
 
 .color-presets {
   display: flex;
@@ -298,8 +290,6 @@ body {
   transform: scale(1.1);
 }
 
-
-
 /* 主题描述文字 */
 .theme-description {
   margin-top: 8px;
@@ -312,7 +302,6 @@ body {
   color: var(--text-muted);
   line-height: 1.4;
 }
-
 
 /* 主内容区域 */
 .main-content {
@@ -746,9 +735,6 @@ body {
 }
 
 
-
-
-
 /* 回到顶部按钮 */
 .back-to-top {
   position: absolute;
@@ -821,8 +807,6 @@ body {
     font-size: 11px;
   }
 }
-
-
 
 /* 搜索结果高亮 */
 .bookmark-title .highlight {
