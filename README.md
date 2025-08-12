@@ -1,7 +1,7 @@
 # 时间轴书签 Chrome 扩展
 
 一个现代化的Chrome浏览器扩展，提供优雅的书签管理体验，支持分页加载、实时搜索、主题切换等功能。
-![alt text](image-2.png)![alt text](image.png)![alt text](image-1.png)
+![alt text](image-3.png)![alt text](image-4.png)
 
 ## ✨ 主要特性
 
