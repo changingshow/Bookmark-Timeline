@@ -217,6 +217,33 @@ body {
   z-index: 9999;
 }
 
+/* 面板顶部小三角箭头 */
+.theme-panel::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 56px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid var(--border-color);
+  z-index: 1;
+}
+
+.theme-panel::after {
+  content: '';
+  position: absolute;
+  top: -7px;
+  right: 56px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid var(--bg-secondary);
+  z-index: 2;
+}
+
 .theme-panel.active {
   opacity: 1;
   transform: translateY(0);
