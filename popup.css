@@ -18,6 +18,7 @@
   --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
   --button-color: #667eea;
   --title-color: #667eea;
+  --focus-shadow-color: rgba(102, 126, 234, 0.1);
 }
 
 /* 深色主题 */
@@ -157,8 +158,8 @@ body {
 }
 
 .search-input:focus {
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--button-color);
+  box-shadow: 0 0 0 3px var(--focus-shadow-color);
 }
 
 .search-clear {

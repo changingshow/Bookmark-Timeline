@@ -138,6 +138,10 @@ class BookmarkManager {
     root.style.setProperty('--button-color', color);
     root.style.setProperty('--title-color', color);
 
+    // 设置焦点阴影颜色（带透明度）
+    const focusShadowColor = this.hexToRgba(color, 0.1);
+    root.style.setProperty('--focus-shadow-color', focusShadowColor);
+
     // 设置滚动条颜色
     this.setScrollbarColorByTheme(colorName);
 
@@ -783,6 +787,19 @@ class BookmarkManager {
     const newDate = new Date(newGroup);
     const existingDate = new Date(existingGroup);
     return newDate.getTime() > existingDate.getTime();
+  }
+
+  // 将十六进制颜色转换为rgba格式
+  hexToRgba(hex, alpha) {
+    // 移除#号
+    hex = hex.replace('#', '');
+
+    // 解析RGB值
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 }
 
