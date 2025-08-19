@@ -827,7 +827,7 @@ body {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   padding: 0; /* 移除上下间距，消除割裂感 */
   min-width: 200px;
-  max-width: 280px;
+  max-width: 260px; /* 减小最大宽度，为滚动条留更多空间 */
   z-index: 10000;
   opacity: 0;
   visibility: hidden;

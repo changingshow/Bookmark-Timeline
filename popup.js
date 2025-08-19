@@ -953,12 +953,16 @@ class BookmarkManager {
     menu.style.visibility = 'hidden';
     menu.style.opacity = '0';
 
+    // 动态限制菜单最大宽度，确保不遮盖滚动条
+    const maxAllowedWidth = availableWidth - 16; // 留16px边距
+    menu.style.maxWidth = `${maxAllowedWidth}px`;
+
     const menuRect = menu.getBoundingClientRect();
     const menuWidth = menuRect.width;
     const menuHeight = menuRect.height;
 
-    // 滚动条宽度（6px + 一些额外边距）
-    const scrollbarWidth = 10;
+    // 滚动条宽度（6px + 更多额外边距确保不遮盖）
+    const scrollbarWidth = 20;
 
     // 计算可用宽度（减去滚动条宽度）
     const availableWidth = container.offsetWidth - scrollbarWidth;
@@ -1063,20 +1067,26 @@ class BookmarkManager {
       let menuLeft = x - containerRect.left;
       let menuTop = y - containerRect.top;
 
+      // 滚动条宽度（6px + 更多额外边距确保不遮盖）
+      const scrollbarWidth = 20;
+
+      // 计算可用宽度（减去滚动条宽度）
+      const availableWidth = container.offsetWidth - scrollbarWidth;
+
       // 临时显示菜单以获取其尺寸（但保持不可见）
       menu.style.display = 'block';
       menu.style.visibility = 'hidden';
       menu.style.opacity = '0';
 
+      // 动态限制菜单最大宽度，确保不遮盖滚动条
+      const maxAllowedWidth = availableWidth - 16; // 留16px边距
+      menu.style.maxWidth = `${maxAllowedWidth}px`;
+
       const menuRect = menu.getBoundingClientRect();
       const menuWidth = menuRect.width;
       const menuHeight = menuRect.height;
 
-      // 滚动条宽度（6px + 一些额外边距）
-      const scrollbarWidth = 10;
 
-      // 计算可用宽度（减去滚动条宽度）
-      const availableWidth = container.offsetWidth - scrollbarWidth;
 
       // 确保菜单不会超出容器边界（考虑滚动条）
       if (menuLeft + menuWidth > availableWidth) {
