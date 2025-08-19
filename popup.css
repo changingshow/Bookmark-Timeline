@@ -64,6 +64,7 @@ body {
   border: none;
   box-shadow: none;
   overflow: hidden;
+  position: relative; /* 为绝对定位的右键菜单提供定位基准 */
 }
 
 /* 头部样式 */
@@ -815,4 +816,124 @@ body {
   padding: 1px 3px;
   border-radius: 3px;
   font-weight: 600;
+}
+
+/* 右键菜单样式 */
+.context-menu {
+  position: absolute;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 0; /* 移除上下间距，消除割裂感 */
+  min-width: 200px;
+  max-width: 280px;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95);
+  transition: all 0.15s ease;
+  backdrop-filter: blur(20px);
+  display: none; /* 默认完全隐藏 */
+  overflow: hidden; /* 确保圆角效果完整 */
+}
+
+.context-menu.visible {
+  display: block; /* 显示时设置为block */
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease; /* 更全面的过渡效果 */
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  position: relative;
+  border-radius: 0; /* 移除默认圆角 */
+}
+
+/* 第一个菜单项的圆角 */
+.context-menu-item:first-child {
+  border-radius: 8px 8px 0 0; /* 只有顶部圆角 */
+}
+
+/* 最后一个菜单项的圆角 */
+.context-menu-item:last-child {
+  border-radius: 0 0 8px 8px; /* 只有底部圆角 */
+}
+
+/* 如果只有一个菜单项，四个角都要圆角 */
+.context-menu-item:only-child {
+  border-radius: 8px;
+}
+
+.context-menu-item:hover {
+  background: var(--bg-hover);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 简单的阴影效果 */
+}
+
+.context-menu-item.danger {
+  color: #ef4444;
+}
+
+.context-menu-item.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2); /* 红色阴影 */
+}
+
+.context-menu-item svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.context-menu-item .menu-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.context-menu-item .folder-path {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+/* 为"所在目录"菜单项添加箭头指示器 */
+.context-menu-item:first-child:hover::after {
+  content: '→';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-color);
+  font-weight: bold;
+  opacity: 0.8;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-5px);
+  }
+  to {
+    opacity: 0.8;
+    transform: translateY(-50%) translateX(0);
+  }
 }

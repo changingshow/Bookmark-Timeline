@@ -153,6 +153,25 @@
         </svg>
     </button>
 
+    <!-- 右键菜单 -->
+    <div class="context-menu" id="contextMenu">
+        <button class="context-menu-item" id="showFolderItem">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/>
+            </svg>
+            <div class="menu-text">
+                <div>所在目录</div>
+                <div class="folder-path" id="folderPath">加载中...</div>
+            </div>
+        </button>
+        <button class="context-menu-item danger" id="deleteBookmarkItem">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+            </svg>
+            <div class="menu-text">删除书签</div>
+        </button>
+    </div>
+
     <script src="popup.js"></script>
 </body>
 </html>

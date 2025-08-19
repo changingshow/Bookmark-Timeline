@@ -32,8 +32,20 @@ class BookmarkManager {
       searchInput: document.getElementById('searchInput'),
       searchClear: document.getElementById('searchClear'),
       managerButton: document.getElementById('managerButton'),
-      backToTop: document.getElementById('backToTop')
+      backToTop: document.getElementById('backToTop'),
+      contextMenu: document.getElementById('contextMenu'),
+      showFolderItem: document.getElementById('showFolderItem'),
+      deleteBookmarkItem: document.getElementById('deleteBookmarkItem'),
+      folderPath: document.getElementById('folderPath')
     };
+
+    // 初始化右键菜单相关变量
+    this.currentContextBookmark = null;
+    this.hideTimer = null; // 延迟消失定时器
+    this.menuVisible = false; // 菜单显示状态
+    this.bookmarkRect = null; // 书签区域坐标
+    this.menuRect = null; // 菜单区域坐标
+    this.currentBookmarkElement = null; // 当前右键的书签元素
   }
 
   bindEvents() {
@@ -78,6 +90,26 @@ class BookmarkManager {
       if (!this.elements.themeSettings.contains(e.target) &&
           !this.elements.themePanel.contains(e.target)) {
         this.elements.themePanel.classList.remove('active');
+      }
+    });
+
+    // 右键菜单事件
+    this.elements.showFolderItem.addEventListener('click', () => this.showBookmarkFolder());
+    this.elements.deleteBookmarkItem.addEventListener('click', () => this.deleteBookmark());
+
+    // 阻止右键菜单的右键事件冒泡
+    this.elements.contextMenu.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    // 鼠标移动事件 - 用于联合区域检测
+    document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+
+    // 页面滚动事件 - 滚动时立即隐藏菜单
+    this.elements.bookmarksContainer.addEventListener('scroll', (e) => {
+      if (this.menuVisible) {
+        this.hideContextMenuImmediately();
       }
     });
   }
@@ -705,10 +737,48 @@ class BookmarkManager {
     this.elements.loadingIndicator.classList.add('hidden');
   }
 
-  handleContextMenu(e, bookmark) {
-    e.preventDefault();
-    // 这里可以实现右键菜单功能
-    console.log('右键菜单:', bookmark);
+  async handleContextMenu(e, bookmark) {
+    try {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // 隐藏其他可能打开的菜单
+      this.hideContextMenu();
+
+      // 设置当前选中的书签
+      this.currentContextBookmark = bookmark;
+
+      // 获取并显示书签所在目录
+      await this.updateFolderPath(bookmark.parentId);
+
+      // 获取书签项目元素
+      const bookmarkElement = e.currentTarget || e.target;
+
+      // 安全检查：确保元素存在且有getBoundingClientRect方法
+      if (!bookmarkElement || typeof bookmarkElement.getBoundingClientRect !== 'function') {
+        console.warn('无法获取有效的书签元素，使用鼠标位置显示菜单', {
+          currentTarget: e.currentTarget,
+          target: e.target,
+          bookmarkElement: bookmarkElement
+        });
+        this.showContextMenuAtPosition(e.clientX, e.clientY);
+        return;
+      }
+
+      // 保存当前书签元素引用
+      this.currentBookmarkElement = bookmarkElement;
+
+      // 显示右键菜单，相对于书签项目定位
+      this.showContextMenu(bookmarkElement);
+    } catch (error) {
+      console.error('右键菜单处理出错:', error);
+      // 出错时使用鼠标位置作为回退方案
+      try {
+        this.showContextMenuAtPosition(e.clientX, e.clientY);
+      } catch (fallbackError) {
+        console.error('回退方案也失败了:', fallbackError);
+      }
+    }
   }
 
   handleKeyNavigation(e) {
@@ -856,6 +926,327 @@ class BookmarkManager {
       top: 0,
       behavior: 'smooth'
     });
+  }
+
+  // 显示右键菜单
+  showContextMenu(bookmarkElement) {
+    // 安全检查
+    if (!bookmarkElement) {
+      console.error('书签元素为空，无法显示菜单');
+      return;
+    }
+
+    const menu = this.elements.contextMenu;
+    const container = this.elements.container;
+
+    // 获取书签元素的位置信息
+    const bookmarkRect = bookmarkElement.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    // 计算菜单的初始位置（相对于容器）
+    let menuLeft = bookmarkRect.right - containerRect.left + 8; // 在书签右侧显示，留8px间距
+    let menuTop = bookmarkRect.top - containerRect.top; // 与书签顶部对齐
+
+    // 临时显示菜单以获取其尺寸（但保持不可见）
+    menu.style.display = 'block';
+    menu.style.visibility = 'hidden';
+    menu.style.opacity = '0';
+
+    const menuRect = menu.getBoundingClientRect();
+    const menuWidth = menuRect.width;
+    const menuHeight = menuRect.height;
+
+    // 检查右侧是否有足够空间，如果没有则显示在左侧
+    if (menuLeft + menuWidth > container.offsetWidth) {
+      menuLeft = bookmarkRect.left - containerRect.left - menuWidth - 8; // 在书签左侧显示
+    }
+
+    // 检查底部是否有足够空间，如果没有则向上调整
+    if (menuTop + menuHeight > container.offsetHeight) {
+      menuTop = container.offsetHeight - menuHeight - 8; // 距离底部8px
+    }
+
+    // 确保菜单不会超出顶部
+    if (menuTop < 8) {
+      menuTop = 8; // 距离顶部8px
+    }
+
+    // 确保菜单不会超出左侧
+    if (menuLeft < 8) {
+      menuLeft = 8; // 距离左侧8px
+    }
+
+    // 设置最终位置
+    menu.style.left = `${menuLeft}px`;
+    menu.style.top = `${menuTop}px`;
+
+    // 显示菜单 - 使用CSS类控制显示状态
+    menu.classList.add('visible');
+
+    // 清除临时的内联样式，让CSS类完全控制
+    menu.style.visibility = '';
+    menu.style.opacity = '';
+
+    // 设置菜单显示状态和联合区域坐标
+    this.menuVisible = true;
+    this.updateUnionArea();
+  }
+
+  // 隐藏右键菜单
+  hideContextMenu() {
+    const menu = this.elements.contextMenu;
+
+    // 移除visible类
+    menu.classList.remove('visible');
+
+    // 清除内联样式，让CSS类完全控制显示状态
+    menu.style.visibility = '';
+    menu.style.opacity = '';
+    menu.style.left = '';
+    menu.style.top = '';
+
+    // 重置状态变量
+    this.menuVisible = false;
+    this.currentContextBookmark = null;
+    this.currentBookmarkElement = null;
+    this.bookmarkRect = null;
+    this.menuRect = null;
+
+    // 清除延迟定时器
+    if (this.hideTimer) {
+      clearTimeout(this.hideTimer);
+      this.hideTimer = null;
+    }
+  }
+
+  // 立即隐藏右键菜单（用于滚动等情况）
+  hideContextMenuImmediately() {
+    this.hideContextMenu();
+  }
+
+  // 回退方法：基于鼠标位置显示菜单
+  showContextMenuAtPosition(x, y) {
+    try {
+      const menu = this.elements.contextMenu;
+      const container = this.elements.container;
+
+      // 安全检查
+      if (!menu || !container) {
+        console.error('菜单或容器元素不存在');
+        return;
+      }
+
+      // 获取容器位置信息
+      const containerRect = container.getBoundingClientRect();
+
+      // 计算相对于容器的位置
+      let menuLeft = x - containerRect.left;
+      let menuTop = y - containerRect.top;
+
+      // 临时显示菜单以获取其尺寸（但保持不可见）
+      menu.style.display = 'block';
+      menu.style.visibility = 'hidden';
+      menu.style.opacity = '0';
+
+      const menuRect = menu.getBoundingClientRect();
+      const menuWidth = menuRect.width;
+      const menuHeight = menuRect.height;
+
+      // 确保菜单不会超出容器边界
+      if (menuLeft + menuWidth > container.offsetWidth) {
+        menuLeft = container.offsetWidth - menuWidth - 8;
+      }
+
+      if (menuTop + menuHeight > container.offsetHeight) {
+        menuTop = container.offsetHeight - menuHeight - 8;
+      }
+
+      // 确保菜单不会超出左侧和顶部
+      if (menuLeft < 8) {
+        menuLeft = 8;
+      }
+
+      if (menuTop < 8) {
+        menuTop = 8;
+      }
+
+      // 设置最终位置
+      menu.style.left = `${menuLeft}px`;
+      menu.style.top = `${menuTop}px`;
+
+      // 显示菜单 - 使用CSS类控制显示状态
+      menu.classList.add('visible');
+
+      // 清除临时的内联样式，让CSS类完全控制
+      menu.style.visibility = '';
+      menu.style.opacity = '';
+
+      // 设置菜单显示状态
+      this.menuVisible = true;
+
+      // 对于回退方案，只更新菜单区域坐标
+      this.menuRect = menu.getBoundingClientRect();
+      if (this.currentBookmarkElement) {
+        this.bookmarkRect = this.currentBookmarkElement.getBoundingClientRect();
+      }
+    } catch (error) {
+      console.error('显示右键菜单时出错:', error);
+    }
+  }
+
+  // 获取并更新书签所在目录路径
+  async updateFolderPath(parentId) {
+    try {
+      const folderPath = await this.getBookmarkFolderPath(parentId);
+      this.elements.folderPath.textContent = folderPath;
+    } catch (error) {
+      console.error('获取目录路径失败:', error);
+      this.elements.folderPath.textContent = '未知目录';
+    }
+  }
+
+  // 递归获取书签目录路径
+  async getBookmarkFolderPath(folderId) {
+    if (!folderId || folderId === '0') {
+      return '书签栏';
+    }
+
+    try {
+      const folders = await chrome.bookmarks.get(folderId);
+      if (folders.length === 0) {
+        return '未知目录';
+      }
+
+      const folder = folders[0];
+      if (!folder.parentId || folder.parentId === '0') {
+        return folder.title || '书签栏';
+      }
+
+      const parentPath = await this.getBookmarkFolderPath(folder.parentId);
+      return `${parentPath} > ${folder.title}`;
+    } catch (error) {
+      console.error('获取目录信息失败:', error);
+      return '未知目录';
+    }
+  }
+
+  // 显示书签所在目录（在书签管理器中）
+  async showBookmarkFolder() {
+    if (!this.currentContextBookmark) return;
+
+    try {
+      // 打开书签管理器并定位到指定目录
+      const url = `chrome://bookmarks/?id=${this.currentContextBookmark.parentId}`;
+      await chrome.tabs.create({ url });
+      window.close();
+    } catch (error) {
+      console.error('打开书签目录失败:', error);
+    }
+
+    this.hideContextMenu();
+  }
+
+  // 删除书签
+  async deleteBookmark() {
+    if (!this.currentContextBookmark) return;
+
+    try {
+      // 删除书签
+      await chrome.bookmarks.remove(this.currentContextBookmark.id);
+
+      // 从本地数组中移除
+      this.bookmarks = this.bookmarks.filter(b => b.id !== this.currentContextBookmark.id);
+      this.filteredBookmarks = this.filteredBookmarks.filter(b => b.id !== this.currentContextBookmark.id);
+
+      // 重新渲染书签列表
+      this.elements.bookmarksList.innerHTML = '';
+      this.renderBookmarks(true);
+
+      console.log('书签删除成功');
+    } catch (error) {
+      console.error('删除书签失败:', error);
+    }
+
+    this.hideContextMenu();
+  }
+
+  // 更新联合区域坐标
+  updateUnionArea() {
+    if (!this.currentBookmarkElement || !this.menuVisible) {
+      return;
+    }
+
+    try {
+      // 获取书签元素的坐标
+      this.bookmarkRect = this.currentBookmarkElement.getBoundingClientRect();
+
+      // 获取菜单元素的坐标
+      this.menuRect = this.elements.contextMenu.getBoundingClientRect();
+    } catch (error) {
+      console.error('更新联合区域坐标失败:', error);
+    }
+  }
+
+  // 检查鼠标是否在联合区域内
+  isMouseInUnionArea(mouseX, mouseY) {
+    if (!this.bookmarkRect || !this.menuRect) {
+      return false;
+    }
+
+    // 检查是否在书签区域内
+    const inBookmarkArea = (
+      mouseX >= this.bookmarkRect.left &&
+      mouseX <= this.bookmarkRect.right &&
+      mouseY >= this.bookmarkRect.top &&
+      mouseY <= this.bookmarkRect.bottom
+    );
+
+    // 检查是否在菜单区域内
+    const inMenuArea = (
+      mouseX >= this.menuRect.left &&
+      mouseX <= this.menuRect.right &&
+      mouseY >= this.menuRect.top &&
+      mouseY <= this.menuRect.bottom
+    );
+
+    return inBookmarkArea || inMenuArea;
+  }
+
+  // 处理鼠标移动事件
+  handleMouseMove(e) {
+    if (!this.menuVisible) {
+      return;
+    }
+
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    // 检查鼠标是否在联合区域内
+    const inUnionArea = this.isMouseInUnionArea(mouseX, mouseY);
+
+    if (inUnionArea) {
+      // 鼠标在联合区域内，清除延迟定时器
+      if (this.hideTimer) {
+        clearTimeout(this.hideTimer);
+        this.hideTimer = null;
+      }
+    } else {
+      // 鼠标离开联合区域，启动延迟消失
+      if (!this.hideTimer) {
+        this.startHideTimer();
+      }
+    }
+  }
+
+  // 启动延迟消失定时器
+  startHideTimer() {
+    if (this.hideTimer) {
+      clearTimeout(this.hideTimer);
+    }
+
+    this.hideTimer = setTimeout(() => {
+      this.hideContextMenu();
+    }, 300); // 300ms延迟
   }
 }
 
