@@ -751,16 +751,17 @@ class BookmarkManager {
       // 获取并显示书签所在目录
       await this.updateFolderPath(bookmark.parentId);
 
-      // 获取书签项目元素
-      const bookmarkElement = e.currentTarget || e.target;
+      // 获取书签项目元素 - 多重回退策略
+      let bookmarkElement = e.currentTarget;
+
+      // 如果currentTarget不可用，尝试从target向上查找
+      if (!bookmarkElement) {
+        bookmarkElement = e.target?.closest('.bookmark-item');
+      }
 
       // 安全检查：确保元素存在且有getBoundingClientRect方法
       if (!bookmarkElement || typeof bookmarkElement.getBoundingClientRect !== 'function') {
-        console.warn('无法获取有效的书签元素，使用鼠标位置显示菜单', {
-          currentTarget: e.currentTarget,
-          target: e.target,
-          bookmarkElement: bookmarkElement
-        });
+        console.warn('无法获取有效的书签元素，使用鼠标位置显示菜单');
         this.showContextMenuAtPosition(e.clientX, e.clientY);
         return;
       }
@@ -768,8 +769,8 @@ class BookmarkManager {
       // 保存当前书签元素引用
       this.currentBookmarkElement = bookmarkElement;
 
-      // 显示右键菜单，相对于书签项目定位
-      this.showContextMenu(bookmarkElement);
+      // 显示右键菜单，基于鼠标位置定位
+      this.showContextMenuAtPosition(e.clientX, e.clientY);
     } catch (error) {
       console.error('右键菜单处理出错:', error);
       // 出错时使用鼠标位置作为回退方案
@@ -956,9 +957,24 @@ class BookmarkManager {
     const menuWidth = menuRect.width;
     const menuHeight = menuRect.height;
 
-    // 检查右侧是否有足够空间，如果没有则显示在左侧
-    if (menuLeft + menuWidth > container.offsetWidth) {
-      menuLeft = bookmarkRect.left - containerRect.left - menuWidth - 8; // 在书签左侧显示
+    // 滚动条宽度（6px + 一些额外边距）
+    const scrollbarWidth = 10;
+
+    // 计算可用宽度（减去滚动条宽度）
+    const availableWidth = container.offsetWidth - scrollbarWidth;
+
+    // 检查右侧是否有足够空间（考虑滚动条）
+    if (menuLeft + menuWidth > availableWidth) {
+      // 尝试显示在左侧
+      const leftPosition = bookmarkRect.left - containerRect.left - menuWidth - 8;
+
+      if (leftPosition >= 8) {
+        // 左侧有足够空间
+        menuLeft = leftPosition;
+      } else {
+        // 左右都不够，强制在可用区域内显示
+        menuLeft = Math.max(8, availableWidth - menuWidth - 8);
+      }
     }
 
     // 检查底部是否有足够空间，如果没有则向上调整
@@ -971,9 +987,13 @@ class BookmarkManager {
       menuTop = 8; // 距离顶部8px
     }
 
-    // 确保菜单不会超出左侧
+    // 最终确保菜单不会超出可用区域
     if (menuLeft < 8) {
       menuLeft = 8; // 距离左侧8px
+    }
+
+    if (menuLeft + menuWidth > availableWidth) {
+      menuLeft = availableWidth - menuWidth - 8; // 确保不遮盖滚动条
     }
 
     // 设置最终位置
@@ -1052,9 +1072,15 @@ class BookmarkManager {
       const menuWidth = menuRect.width;
       const menuHeight = menuRect.height;
 
-      // 确保菜单不会超出容器边界
-      if (menuLeft + menuWidth > container.offsetWidth) {
-        menuLeft = container.offsetWidth - menuWidth - 8;
+      // 滚动条宽度（6px + 一些额外边距）
+      const scrollbarWidth = 10;
+
+      // 计算可用宽度（减去滚动条宽度）
+      const availableWidth = container.offsetWidth - scrollbarWidth;
+
+      // 确保菜单不会超出容器边界（考虑滚动条）
+      if (menuLeft + menuWidth > availableWidth) {
+        menuLeft = availableWidth - menuWidth - 8;
       }
 
       if (menuTop + menuHeight > container.offsetHeight) {
@@ -1068,6 +1094,11 @@ class BookmarkManager {
 
       if (menuTop < 8) {
         menuTop = 8;
+      }
+
+      // 最终确保不遮盖滚动条
+      if (menuLeft + menuWidth > availableWidth) {
+        menuLeft = availableWidth - menuWidth - 8;
       }
 
       // 设置最终位置

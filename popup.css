@@ -921,19 +921,21 @@ body {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--accent-color);
-  font-weight: bold;
-  opacity: 0.8;
+  color: var(--button-color); /* 使用主题按钮颜色，更明显 */
+  font-weight: 900; /* 更加粗体 */
+  font-size: 16px; /* 增大字体 */
+  opacity: 1; /* 完全不透明，更明显 */
   animation: slideIn 0.2s ease;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.1); /* 添加轻微阴影增加对比度 */
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-50%) translateX(-5px);
+    transform: translateY(-50%) translateX(-8px) scale(0.8); /* 增加缩放效果 */
   }
   to {
-    opacity: 0.8;
-    transform: translateY(-50%) translateX(0);
+    opacity: 1; /* 完全不透明 */
+    transform: translateY(-50%) translateX(0) scale(1); /* 正常大小 */
   }
 }
