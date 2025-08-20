@@ -832,10 +832,11 @@ body {
   opacity: 0;
   visibility: hidden;
   transform: scale(0.95);
-  transition: all 0.15s ease;
+  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease; /* 只对特定属性做过渡 */
   backdrop-filter: blur(20px);
   display: none; /* 默认完全隐藏 */
   overflow: hidden; /* 确保圆角效果完整 */
+  contain: layout style; /* 优化渲染性能，防止布局抖动 */
 }
 
 .context-menu.visible {
@@ -853,7 +854,7 @@ body {
   font-size: 13px;
   color: var(--text-primary);
   cursor: pointer;
-  transition: all 0.15s ease; /* 更全面的过渡效果 */
+  transition: background-color 0.15s ease, box-shadow 0.15s ease; /* 只对背景和阴影做过渡，避免影响布局 */
   border: none;
   background: none;
   width: 100%;
@@ -895,6 +896,8 @@ body {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
+  vertical-align: middle; /* 确保垂直对齐稳定 */
+  display: block; /* 避免inline元素的基线对齐问题 */
 }
 
 .context-menu-item .menu-text {
@@ -902,6 +905,10 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-height: 1.2em; /* 确保文本区域有固定的最小高度 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 垂直居中对齐 */
 }
 
 .context-menu-item .folder-path {
@@ -927,15 +934,17 @@ body {
   opacity: 1; /* 完全不透明，更明显 */
   animation: slideIn 0.2s ease;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.1); /* 添加轻微阴影增加对比度 */
+  pointer-events: none; /* 确保箭头不会影响鼠标事件 */
+  will-change: transform, opacity; /* 优化动画性能 */
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-50%) translateX(-8px) scale(0.8); /* 增加缩放效果 */
+    transform: translateY(-50%) translateX(-4px); /* 减少移动距离，移除scale避免布局影响 */
   }
   to {
     opacity: 1; /* 完全不透明 */
-    transform: translateY(-50%) translateX(0) scale(1); /* 正常大小 */
+    transform: translateY(-50%) translateX(0); /* 正常位置 */
   }
 }

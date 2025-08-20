@@ -952,6 +952,7 @@ class BookmarkManager {
     menu.style.display = 'block';
     menu.style.visibility = 'hidden';
     menu.style.opacity = '0';
+    menu.style.transform = 'scale(1)'; // 确保在计算尺寸时使用正常大小
 
     // 动态限制菜单最大宽度，确保不遮盖滚动条
     const maxAllowedWidth = availableWidth - 16; // 留16px边距
@@ -1004,12 +1005,15 @@ class BookmarkManager {
     menu.style.left = `${menuLeft}px`;
     menu.style.top = `${menuTop}px`;
 
-    // 显示菜单 - 使用CSS类控制显示状态
-    menu.classList.add('visible');
+    // 使用requestAnimationFrame确保DOM更新完成后再显示菜单
+    requestAnimationFrame(() => {
+      menu.classList.add('visible');
+    });
 
     // 清除临时的内联样式，让CSS类完全控制
     menu.style.visibility = '';
     menu.style.opacity = '';
+    menu.style.transform = ''; // 清除临时的transform设置
 
     // 设置菜单显示状态和联合区域坐标
     this.menuVisible = true;
@@ -1026,8 +1030,11 @@ class BookmarkManager {
     // 清除内联样式，让CSS类完全控制显示状态
     menu.style.visibility = '';
     menu.style.opacity = '';
+    menu.style.transform = '';
     menu.style.left = '';
     menu.style.top = '';
+    menu.style.maxWidth = '';
+    menu.style.display = ''; // 清除display设置
 
     // 重置状态变量
     this.menuVisible = false;
@@ -1077,6 +1084,7 @@ class BookmarkManager {
       menu.style.display = 'block';
       menu.style.visibility = 'hidden';
       menu.style.opacity = '0';
+      menu.style.transform = 'scale(1)'; // 确保在计算尺寸时使用正常大小
 
       // 动态限制菜单最大宽度，确保不遮盖滚动条
       const maxAllowedWidth = availableWidth - 16; // 留16px边距
@@ -1115,12 +1123,15 @@ class BookmarkManager {
       menu.style.left = `${menuLeft}px`;
       menu.style.top = `${menuTop}px`;
 
-      // 显示菜单 - 使用CSS类控制显示状态
-      menu.classList.add('visible');
+      // 使用requestAnimationFrame确保DOM更新完成后再显示菜单
+      requestAnimationFrame(() => {
+        menu.classList.add('visible');
+      });
 
       // 清除临时的内联样式，让CSS类完全控制
       menu.style.visibility = '';
       menu.style.opacity = '';
+      menu.style.transform = ''; // 清除临时的transform设置
 
       // 设置菜单显示状态
       this.menuVisible = true;
