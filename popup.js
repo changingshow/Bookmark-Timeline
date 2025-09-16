@@ -36,7 +36,9 @@ class BookmarkManager {
       contextMenu: document.getElementById('contextMenu'),
       showFolderItem: document.getElementById('showFolderItem'),
       deleteBookmarkItem: document.getElementById('deleteBookmarkItem'),
-      folderPath: document.getElementById('folderPath')
+      folderPath: document.getElementById('folderPath'),
+      urlTooltip: document.getElementById('urlTooltip'),
+      urlTooltipContent: document.getElementById('urlTooltipContent')
     };
 
     // 初始化右键菜单相关变量
@@ -46,6 +48,12 @@ class BookmarkManager {
     this.bookmarkRect = null; // 书签区域坐标
     this.menuRect = null; // 菜单区域坐标
     this.currentBookmarkElement = null; // 当前右键的书签元素
+
+    // 初始化URL提示框相关变量
+    this.tooltipVisible = false;
+    this.tooltipTimer = null;
+    this.currentHoveredBookmark = null;
+    this.lastMousePosition = { x: 0, y: 0 };
   }
 
   bindEvents() {
@@ -67,6 +75,7 @@ class BookmarkManager {
     // 搜索功能
     this.elements.searchClear.addEventListener('click', () => this.clearSearch());
     this.elements.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+    this.elements.searchInput.addEventListener('focus', () => this.hideUrlTooltipImmediate());
     this.elements.searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         this.elements.searchInput.blur();
@@ -106,12 +115,20 @@ class BookmarkManager {
     // 鼠标移动事件 - 用于联合区域检测
     document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
 
-    // 页面滚动事件 - 滚动时立即隐藏菜单
+    // 页面滚动事件 - 滚动时立即隐藏菜单和tooltip
     this.elements.bookmarksContainer.addEventListener('scroll', (e) => {
       if (this.menuVisible) {
         this.hideContextMenuImmediately();
       }
+      // 滚动时也隐藏tooltip
+      if (this.tooltipVisible) {
+        this.hideUrlTooltipImmediate();
+      }
     });
+
+    // 全局鼠标事件 - 用于tooltip跟踪
+    this.elements.bookmarksContainer.addEventListener('mousemove', (e) => this.handleGlobalMouseMove(e));
+    this.elements.bookmarksContainer.addEventListener('mouseleave', () => this.handleGlobalMouseLeave());
   }
 
   async initializeTheme() {
@@ -154,6 +171,10 @@ class BookmarkManager {
 
   toggleThemePanel() {
     this.elements.themePanel.classList.toggle('active');
+    // 显示主题面板时隐藏tooltip
+    if (this.elements.themePanel.classList.contains('active')) {
+      this.hideUrlTooltipImmediate();
+    }
   }
 
   async setThemeColor(colorName) {
@@ -497,6 +518,7 @@ class BookmarkManager {
     const item = document.createElement('div');
     item.className = 'bookmark-item';
     item.setAttribute('data-url', bookmark.url);
+    item.setAttribute('data-bookmark-id', bookmark.id);
     
     const icon = this.createBookmarkIcon(bookmark.url);
     const content = this.createBookmarkContent(bookmark);
@@ -742,8 +764,9 @@ class BookmarkManager {
       e.preventDefault();
       e.stopPropagation();
 
-      // 隐藏其他可能打开的菜单
+      // 隐藏其他可能打开的菜单和tooltip
       this.hideContextMenu();
+      this.hideUrlTooltipImmediate();
 
       // 设置当前选中的书签
       this.currentContextBookmark = bookmark;
@@ -1299,6 +1322,157 @@ class BookmarkManager {
     this.hideTimer = setTimeout(() => {
       this.hideContextMenu();
     }, 300); // 300ms延迟
+  }
+
+  // 全局鼠标移动处理 - 用于tooltip跟踪
+  handleGlobalMouseMove(e) {
+    // 更新鼠标位置
+    this.lastMousePosition = { x: e.clientX, y: e.clientY };
+
+    // 获取鼠标下方的元素
+    const elementUnderMouse = document.elementFromPoint(e.clientX, e.clientY);
+    
+    // 查找最近的书签项元素
+    const bookmarkItem = elementUnderMouse?.closest('.bookmark-item');
+    
+    if (bookmarkItem) {
+      // 获取书签URL
+      const bookmarkUrl = bookmarkItem.getAttribute('data-url');
+      const bookmarkId = bookmarkItem.getAttribute('data-bookmark-id');
+      
+      if (bookmarkUrl && bookmarkId) {
+        // 如果是新的书签或tooltip未显示，则重新显示
+        if (!this.tooltipVisible || this.currentHoveredBookmark?.id !== bookmarkId) {
+          // 清除之前的定时器
+          if (this.tooltipTimer) {
+            clearTimeout(this.tooltipTimer);
+            this.tooltipTimer = null;
+          }
+
+          // 立即隐藏之前的tooltip（如果有）
+          if (this.tooltipVisible) {
+            this.hideUrlTooltipImmediate();
+          }
+
+          // 保存当前书签信息
+          this.currentHoveredBookmark = { id: bookmarkId, url: bookmarkUrl };
+
+          // 延迟显示新的tooltip
+          this.tooltipTimer = setTimeout(() => {
+            this.showUrlTooltip(bookmarkUrl);
+          }, 200); // 减少延迟到200ms，提高响应性
+        } else if (this.tooltipVisible) {
+          // 如果是同一个书签且tooltip已显示，则更新位置
+          this.updateTooltipPosition();
+        }
+      }
+    } else {
+      // 鼠标不在任何书签上，隐藏tooltip
+      this.hideUrlTooltip();
+    }
+  }
+
+  // 全局鼠标离开处理
+  handleGlobalMouseLeave() {
+    this.hideUrlTooltip();
+  }
+
+  // 显示URL提示框
+  showUrlTooltip(url) {
+    if (!this.elements.urlTooltip || !this.elements.urlTooltipContent) {
+      return;
+    }
+
+    // 设置提示框内容
+    this.elements.urlTooltipContent.textContent = url;
+
+    const tooltip = this.elements.urlTooltip;
+
+    // 先显示tooltip以便获取正确的尺寸
+    tooltip.classList.add('visible');
+    this.tooltipVisible = true;
+
+    // 立即更新位置
+    this.updateTooltipPosition();
+  }
+
+  // 更新tooltip位置
+  updateTooltipPosition() {
+    if (!this.elements.urlTooltip || !this.tooltipVisible) {
+      return;
+    }
+
+    const tooltip = this.elements.urlTooltip;
+    const container = this.elements.container;
+    const containerRect = container.getBoundingClientRect();
+
+    // 使用当前鼠标位置
+    const mouseX = this.lastMousePosition.x;
+    const mouseY = this.lastMousePosition.y;
+
+    // 获取tooltip当前高度
+    const tooltipHeight = tooltip.offsetHeight;
+
+    // 计算垂直位置：优先在鼠标上方5px处
+    let tooltipTop = mouseY - tooltipHeight - 5;
+
+    // 检查是否会超出顶部
+    if (tooltipTop < containerRect.top + 10) {
+      // 如果会超出顶部，则显示在鼠标下方5px
+      tooltipTop = mouseY + 5;
+    }
+
+    // 检查是否会超出底部
+    if (tooltipTop + tooltipHeight > containerRect.bottom - 10) {
+      // 如果会超出底部，强制显示在鼠标上方
+      tooltipTop = mouseY - tooltipHeight - 5;
+      // 如果还是超出顶部，则限制在容器内
+      if (tooltipTop < containerRect.top + 10) {
+        tooltipTop = containerRect.top + 10;
+      }
+    }
+
+    // 转换为相对于容器的位置
+    const relativeTop = tooltipTop - containerRect.top;
+
+    // 更新位置
+    tooltip.style.top = `${relativeTop}px`;
+  }
+
+  // 隐藏URL提示框
+  hideUrlTooltip() {
+    // 清除显示定时器
+    if (this.tooltipTimer) {
+      clearTimeout(this.tooltipTimer);
+      this.tooltipTimer = null;
+    }
+
+    // 添加延迟隐藏，避免快速移动时闪烁
+    setTimeout(() => {
+      this.hideUrlTooltipImmediate();
+    }, 100);
+  }
+
+  // 立即隐藏URL提示框
+  hideUrlTooltipImmediate() {
+    if (!this.elements.urlTooltip) {
+      return;
+    }
+
+    const tooltip = this.elements.urlTooltip;
+    
+    // 移除显示类
+    tooltip.classList.remove('visible');
+
+    // 重置状态
+    this.tooltipVisible = false;
+    this.currentHoveredBookmark = null;
+
+    // 清理定时器
+    if (this.tooltipTimer) {
+      clearTimeout(this.tooltipTimer);
+      this.tooltipTimer = null;
+    }
   }
 }
 

@@ -948,3 +948,45 @@ body {
     transform: translateY(-50%) translateX(0); /* 正常位置 */
   }
 }
+
+/* URL悬停提示框样式 */
+.url-tooltip {
+  position: absolute;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 8px 12px;
+  z-index: 10001; /* 比右键菜单稍高 */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  backdrop-filter: blur(20px);
+  pointer-events: none; /* 避免鼠标事件干扰 */
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  text-align: left;
+  left: 10px; /* 固定左边距 */
+  right: 10px; /* 固定右边距 */
+  width: auto; /* 自动宽度 */
+  max-width: none; /* 移除最大宽度限制，由left和right控制 */
+}
+
+/* 深色主题下增强对比度 */
+[data-theme="dark"] .url-tooltip {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.url-tooltip.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.url-tooltip-content {
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: normal;
+}
