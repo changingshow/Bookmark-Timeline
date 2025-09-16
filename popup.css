@@ -952,10 +952,11 @@ body {
 /* URL悬停提示框样式 */
 .url-tooltip {
   position: absolute;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background: rgba(45, 55, 72, 0.95); /* 明亮主题下使用深色背景 */
+  color: #f7fafc; /* 明亮主题下使用浅色文字 */
+  border: 1px solid rgba(45, 55, 72, 0.2);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(45, 55, 72, 0.3);
   padding: 8px 12px;
   z-index: 10001; /* 比右键菜单稍高 */
   opacity: 0;
@@ -965,7 +966,6 @@ body {
   backdrop-filter: blur(20px);
   pointer-events: none; /* 避免鼠标事件干扰 */
   font-size: 12px;
-  color: var(--text-secondary);
   line-height: 1.4;
   text-align: left;
   left: 10px; /* 固定左边距 */
@@ -974,9 +974,12 @@ body {
   max-width: none; /* 移除最大宽度限制，由left和right控制 */
 }
 
-/* 深色主题下增强对比度 */
+/* 深色主题下使用亮色背景 */
 [data-theme="dark"] .url-tooltip {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.95); /* 深色主题下使用亮色背景 */
+  color: #2d3748; /* 深色主题下使用深色文字 */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15), 0 2px 8px rgba(255, 255, 255, 0.2);
 }
 
 .url-tooltip.visible {
