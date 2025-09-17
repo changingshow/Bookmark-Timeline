@@ -53,6 +53,7 @@ class BookmarkManager {
     this.tooltipVisible = false;
     this.tooltipTimer = null;
     this.currentHoveredBookmark = null;
+    this.currentHoveredBookmarkElement = null; // 保存当前悬停的书签元素
     this.lastMousePosition = { x: 0, y: 0 };
   }
 
@@ -1354,17 +1355,16 @@ class BookmarkManager {
             this.hideUrlTooltipImmediate();
           }
 
-          // 保存当前书签信息
+          // 保存当前书签信息和元素引用
           this.currentHoveredBookmark = { id: bookmarkId, url: bookmarkUrl };
+          this.currentHoveredBookmarkElement = bookmarkItem;
 
           // 延迟显示新的tooltip
           this.tooltipTimer = setTimeout(() => {
             this.showUrlTooltip(bookmarkUrl);
-          }, 200); // 减少延迟到200ms，提高响应性
-        } else if (this.tooltipVisible) {
-          // 如果是同一个书签且tooltip已显示，则更新位置
-          this.updateTooltipPosition();
+          }, 100); // 调整延迟到100ms，提高响应性
         }
+        // 注意：这里移除了位置更新的逻辑，保持tooltip固定
       }
     } else {
       // 鼠标不在任何书签上，隐藏tooltip
@@ -1379,7 +1379,7 @@ class BookmarkManager {
 
   // 显示URL提示框
   showUrlTooltip(url) {
-    if (!this.elements.urlTooltip || !this.elements.urlTooltipContent) {
+    if (!this.elements.urlTooltip || !this.elements.urlTooltipContent || !this.currentHoveredBookmarkElement) {
       return;
     }
 
@@ -1392,41 +1392,47 @@ class BookmarkManager {
     tooltip.classList.add('visible');
     this.tooltipVisible = true;
 
-    // 立即更新位置
-    this.updateTooltipPosition();
+    // 基于书签元素位置计算固定位置
+    this.calculateFixedTooltipPosition();
   }
 
-  // 更新tooltip位置
-  updateTooltipPosition() {
-    if (!this.elements.urlTooltip || !this.tooltipVisible) {
+  // 计算tooltip的固定位置（基于书签元素）
+  calculateFixedTooltipPosition() {
+    if (!this.elements.urlTooltip || !this.currentHoveredBookmarkElement) {
       return;
     }
 
     const tooltip = this.elements.urlTooltip;
     const container = this.elements.container;
+    const bookmarkElement = this.currentHoveredBookmarkElement;
+
+    // 获取容器和书签元素的位置信息
     const containerRect = container.getBoundingClientRect();
+    const bookmarkRect = bookmarkElement.getBoundingClientRect();
 
-    // 使用当前鼠标位置
-    const mouseX = this.lastMousePosition.x;
-    const mouseY = this.lastMousePosition.y;
-
-    // 获取tooltip当前高度
+    // 获取tooltip高度
     const tooltipHeight = tooltip.offsetHeight;
 
-    // 计算垂直位置：优先在鼠标上方5px处
-    let tooltipTop = mouseY - tooltipHeight - 5;
+    // 计算相对于书签的位置
+    let tooltipTop;
 
-    // 检查是否会超出顶部
-    if (tooltipTop < containerRect.top + 10) {
-      // 如果会超出顶部，则显示在鼠标下方5px
-      tooltipTop = mouseY + 5;
+    // 优先显示在书签上方5px处
+    const abovePosition = bookmarkRect.top - tooltipHeight - 5;
+
+    // 检查上方是否有足够空间
+    if (abovePosition >= containerRect.top + 10) {
+      // 上方有足够空间，显示在书签上方
+      tooltipTop = abovePosition;
+    } else {
+      // 上方空间不足，显示在书签下方5px处
+      tooltipTop = bookmarkRect.bottom + 5;
     }
 
-    // 检查是否会超出底部
+    // 检查下方是否会超出容器
     if (tooltipTop + tooltipHeight > containerRect.bottom - 10) {
-      // 如果会超出底部，强制显示在鼠标上方
-      tooltipTop = mouseY - tooltipHeight - 5;
-      // 如果还是超出顶部，则限制在容器内
+      // 会超出底部，强制显示在书签上方
+      tooltipTop = bookmarkRect.top - tooltipHeight - 5;
+      // 如果还是超出顶部，则限制在容器顶部
       if (tooltipTop < containerRect.top + 10) {
         tooltipTop = containerRect.top + 10;
       }
@@ -1435,7 +1441,7 @@ class BookmarkManager {
     // 转换为相对于容器的位置
     const relativeTop = tooltipTop - containerRect.top;
 
-    // 更新位置
+    // 设置最终位置
     tooltip.style.top = `${relativeTop}px`;
   }
 
@@ -1467,6 +1473,7 @@ class BookmarkManager {
     // 重置状态
     this.tooltipVisible = false;
     this.currentHoveredBookmark = null;
+    this.currentHoveredBookmarkElement = null; // 清除书签元素引用
 
     // 清理定时器
     if (this.tooltipTimer) {
