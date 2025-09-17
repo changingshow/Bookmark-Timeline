@@ -53,8 +53,7 @@ class BookmarkManager {
     this.tooltipVisible = false;
     this.tooltipTimer = null;
     this.currentHoveredBookmark = null;
-    this.currentHoveredBookmarkElement = null; // 保存当前悬停的书签元素
-    this.lastMousePosition = { x: 0, y: 0 };
+    this.currentHoveredBookmarkElement = null;
   }
 
   bindEvents() {
@@ -1327,49 +1326,56 @@ class BookmarkManager {
 
   // 全局鼠标移动处理 - 用于tooltip跟踪
   handleGlobalMouseMove(e) {
-    // 更新鼠标位置
-    this.lastMousePosition = { x: e.clientX, y: e.clientY };
-
-    // 获取鼠标下方的元素
+    // 获取鼠标下方的元素并查找书签项
     const elementUnderMouse = document.elementFromPoint(e.clientX, e.clientY);
-    
-    // 查找最近的书签项元素
     const bookmarkItem = elementUnderMouse?.closest('.bookmark-item');
     
     if (bookmarkItem) {
-      // 获取书签URL
       const bookmarkUrl = bookmarkItem.getAttribute('data-url');
       const bookmarkId = bookmarkItem.getAttribute('data-bookmark-id');
       
-      if (bookmarkUrl && bookmarkId) {
-        // 如果是新的书签或tooltip未显示，则重新显示
-        if (!this.tooltipVisible || this.currentHoveredBookmark?.id !== bookmarkId) {
-          // 清除之前的定时器
-          if (this.tooltipTimer) {
-            clearTimeout(this.tooltipTimer);
-            this.tooltipTimer = null;
-          }
-
-          // 立即隐藏之前的tooltip（如果有）
-          if (this.tooltipVisible) {
-            this.hideUrlTooltipImmediate();
-          }
-
-          // 保存当前书签信息和元素引用
-          this.currentHoveredBookmark = { id: bookmarkId, url: bookmarkUrl };
-          this.currentHoveredBookmarkElement = bookmarkItem;
-
-          // 延迟显示新的tooltip
-          this.tooltipTimer = setTimeout(() => {
-            this.showUrlTooltip(bookmarkUrl);
-          }, 100); // 调整延迟到100ms，提高响应性
+      // 检查是否为新书签或tooltip未显示
+      if (bookmarkUrl && bookmarkId && 
+          (!this.tooltipVisible || this.currentHoveredBookmark?.id !== bookmarkId)) {
+        
+        this.clearTooltipTimer();
+        
+        // 立即隐藏之前的tooltip
+        if (this.tooltipVisible) {
+          this.hideUrlTooltipImmediate();
         }
-        // 注意：这里移除了位置更新的逻辑，保持tooltip固定
+
+        // 保存当前书签信息
+        this.currentHoveredBookmark = { id: bookmarkId, url: bookmarkUrl };
+        this.currentHoveredBookmarkElement = bookmarkItem;
+
+        // 延迟显示tooltip - 50ms获得最佳响应性
+        this.tooltipTimer = setTimeout(() => {
+          if (this.currentHoveredBookmarkElement && 
+              document.contains(this.currentHoveredBookmarkElement)) {
+            this.showUrlTooltip(this.currentHoveredBookmark.url);
+          }
+        }, 50);
       }
     } else {
-      // 鼠标不在任何书签上，隐藏tooltip
+      // 鼠标不在书签上，清理状态
+      this.clearBookmarkState();
       this.hideUrlTooltip();
     }
+  }
+
+  // 清理定时器的辅助方法
+  clearTooltipTimer() {
+    if (this.tooltipTimer) {
+      clearTimeout(this.tooltipTimer);
+      this.tooltipTimer = null;
+    }
+  }
+
+  // 清理书签状态的辅助方法
+  clearBookmarkState() {
+    this.currentHoveredBookmark = null;
+    this.currentHoveredBookmarkElement = null;
   }
 
   // 全局鼠标离开处理
@@ -1447,39 +1453,24 @@ class BookmarkManager {
 
   // 隐藏URL提示框
   hideUrlTooltip() {
-    // 清除显示定时器
-    if (this.tooltipTimer) {
-      clearTimeout(this.tooltipTimer);
-      this.tooltipTimer = null;
-    }
-
-    // 添加延迟隐藏，避免快速移动时闪烁
+    this.clearTooltipTimer();
+    
+    // 短延迟隐藏，避免快速移动时闪烁
     setTimeout(() => {
-      this.hideUrlTooltipImmediate();
-    }, 100);
+      if (!this.currentHoveredBookmark) {
+        this.hideUrlTooltipImmediate();
+      }
+    }, 50);
   }
 
   // 立即隐藏URL提示框
   hideUrlTooltipImmediate() {
-    if (!this.elements.urlTooltip) {
-      return;
-    }
+    if (!this.elements.urlTooltip) return;
 
-    const tooltip = this.elements.urlTooltip;
-    
-    // 移除显示类
-    tooltip.classList.remove('visible');
-
-    // 重置状态
+    this.elements.urlTooltip.classList.remove('visible');
     this.tooltipVisible = false;
-    this.currentHoveredBookmark = null;
-    this.currentHoveredBookmarkElement = null; // 清除书签元素引用
-
-    // 清理定时器
-    if (this.tooltipTimer) {
-      clearTimeout(this.tooltipTimer);
-      this.tooltipTimer = null;
-    }
+    this.clearBookmarkState();
+    this.clearTooltipTimer();
   }
 }
 
