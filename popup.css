@@ -119,6 +119,7 @@ body {
 .header-actions {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 /* 通用按钮样式 */
@@ -147,6 +148,41 @@ body {
   width: 16px;
   height: 16px;
 }
+
+/* URL按钮状态样式 */
+#urlToggle {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* URL按钮开启状态 */
+#urlToggle.active {
+  background: var(--button-color);
+  color: white;
+  border-color: var(--button-color);
+}
+
+/* URL按钮关闭状态 */
+#urlToggle:not(.active) {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+/* URL按钮悬停效果 */
+#urlToggle.active:hover {
+  background: var(--button-color);
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+#urlToggle:not(.active):hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+
 
 /* 搜索容器 */
 .search-container {

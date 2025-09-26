@@ -11,6 +11,7 @@ class BookmarkManager {
     this.initializeElements();
     this.bindEvents();
     this.initializeTheme();
+    this.initializeUrlToggle();
     this.loadBookmarks();
   }
 
@@ -38,7 +39,8 @@ class BookmarkManager {
       deleteBookmarkItem: document.getElementById('deleteBookmarkItem'),
       folderPath: document.getElementById('folderPath'),
       urlTooltip: document.getElementById('urlTooltip'),
-      urlTooltipContent: document.getElementById('urlTooltipContent')
+      urlTooltipContent: document.getElementById('urlTooltipContent'),
+      urlToggle: document.getElementById('urlToggle')
     };
 
     // 初始化右键菜单相关变量
@@ -54,6 +56,7 @@ class BookmarkManager {
     this.tooltipTimer = null;
     this.currentHoveredBookmark = null;
     this.currentHoveredBookmarkElement = null;
+    this.urlDisplayEnabled = false; // URL显示功能开关状态，默认关闭
   }
 
   bindEvents() {
@@ -71,6 +74,9 @@ class BookmarkManager {
     themeColorPresets.forEach(preset => {
       preset.addEventListener('click', () => this.setThemeColor(preset.dataset.color));
     });
+
+    // URL显示开关
+    this.elements.urlToggle.addEventListener('click', () => this.toggleUrlDisplay());
     
     // 搜索功能
     this.elements.searchClear.addEventListener('click', () => this.clearSearch());
@@ -116,7 +122,7 @@ class BookmarkManager {
     document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
 
     // 页面滚动事件 - 滚动时立即隐藏菜单和tooltip
-    this.elements.bookmarksContainer.addEventListener('scroll', (e) => {
+    this.elements.bookmarksContainer.addEventListener('scroll', () => {
       if (this.menuVisible) {
         this.hideContextMenuImmediately();
       }
@@ -216,6 +222,44 @@ class BookmarkManager {
     } catch (error) {
       console.error('保存主题颜色设置失败:', error);
     }
+  }
+
+  // 初始化URL显示开关
+  async initializeUrlToggle() {
+    try {
+      const result = await chrome.storage.sync.get(['urlDisplayEnabled']);
+      this.urlDisplayEnabled = result.urlDisplayEnabled === true; // 默认为false
+    } catch (error) {
+      console.error('加载URL显示设置失败:', error);
+      this.urlDisplayEnabled = false;
+    }
+    this.updateUrlToggleUI();
+  }
+
+  // 切换URL显示功能
+  async toggleUrlDisplay() {
+    this.urlDisplayEnabled = !this.urlDisplayEnabled;
+
+    // 如果关闭功能，立即隐藏当前显示的tooltip
+    if (!this.urlDisplayEnabled && this.tooltipVisible) {
+      this.hideUrlTooltipImmediate();
+    }
+
+    // 更新UI状态
+    this.updateUrlToggleUI();
+
+    try {
+      await chrome.storage.sync.set({ urlDisplayEnabled: this.urlDisplayEnabled });
+    } catch (error) {
+      console.error('保存URL显示设置失败:', error);
+    }
+  }
+
+  // 更新URL开关按钮的UI状态
+  updateUrlToggleUI() {
+    this.elements.urlToggle.classList.toggle('active', this.urlDisplayEnabled);
+    this.elements.urlToggle.title = this.urlDisplayEnabled ?
+      '关闭鼠标悬停显示URL' : '开启鼠标悬停显示URL';
   }
 
   updateThemeColorUI(colorName) {
@@ -341,7 +385,14 @@ class BookmarkManager {
       
       this.hideSkeleton();
       this.renderBookmarks(true);
-      
+
+      // 自动聚焦搜索框
+      setTimeout(() => {
+        if (this.elements.searchInput) {
+          this.elements.searchInput.focus();
+        }
+      }, 100);
+
     } catch (error) {
       console.error('加载书签失败:', error);
       this.hideSkeleton();
@@ -1326,20 +1377,25 @@ class BookmarkManager {
 
   // 全局鼠标移动处理 - 用于tooltip跟踪
   handleGlobalMouseMove(e) {
+    // 如果URL显示功能被关闭，直接返回
+    if (!this.urlDisplayEnabled) {
+      return;
+    }
+
     // 获取鼠标下方的元素并查找书签项
     const elementUnderMouse = document.elementFromPoint(e.clientX, e.clientY);
     const bookmarkItem = elementUnderMouse?.closest('.bookmark-item');
-    
+
     if (bookmarkItem) {
       const bookmarkUrl = bookmarkItem.getAttribute('data-url');
       const bookmarkId = bookmarkItem.getAttribute('data-bookmark-id');
-      
+
       // 检查是否为新书签或tooltip未显示
-      if (bookmarkUrl && bookmarkId && 
+      if (bookmarkUrl && bookmarkId &&
           (!this.tooltipVisible || this.currentHoveredBookmark?.id !== bookmarkId)) {
-        
+
         this.clearTooltipTimer();
-        
+
         // 立即隐藏之前的tooltip
         if (this.tooltipVisible) {
           this.hideUrlTooltipImmediate();
@@ -1351,7 +1407,7 @@ class BookmarkManager {
 
         // 延迟显示tooltip - 50ms获得最佳响应性
         this.tooltipTimer = setTimeout(() => {
-          if (this.currentHoveredBookmarkElement && 
+          if (this.currentHoveredBookmarkElement &&
               document.contains(this.currentHoveredBookmarkElement)) {
             this.showUrlTooltip(this.currentHoveredBookmark.url);
           }
