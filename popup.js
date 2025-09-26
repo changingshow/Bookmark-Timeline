@@ -572,7 +572,7 @@ class BookmarkManager {
     const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
 
     // 设置加载超时时间（毫秒）
-    const LOAD_TIMEOUT = 500;
+    const LOAD_TIMEOUT = 1000;
     let isLoaded = false;
     let timeoutId;
 
