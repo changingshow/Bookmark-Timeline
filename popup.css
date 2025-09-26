@@ -39,14 +39,6 @@
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
 }
 
-/* 尝试覆盖Chrome扩展的默认样式 */
-:root, html, body, .container {
-  background: var(--bg-primary) !important;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
 /* 基础样式重置 */
 * {
   margin: 0;
@@ -54,21 +46,24 @@
   box-sizing: border-box;
 }
 
-html {
+/* 覆盖Chrome扩展的默认样式 */
+:root, html, body, .container {
   background: var(--bg-primary) !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html, body {
   overflow: hidden;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  background: var(--bg-primary) !important;
   color: var(--text-primary);
-  overflow: hidden;
   transition: all 0.3s ease;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  outline: none !important;
 }
 
 /* 容器样式 */
@@ -78,13 +73,8 @@ body {
   display: flex;
   flex-direction: column;
   backdrop-filter: blur(20px);
-  border: none !important;
-  box-shadow: none;
   overflow: hidden;
   position: relative; /* 为绝对定位的右键菜单提供定位基准 */
-  background: var(--bg-primary);
-  margin: 0;
-  padding: 0;
 }
 
 /* 头部样式 */

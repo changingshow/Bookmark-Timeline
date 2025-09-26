@@ -8,6 +8,17 @@ class BookmarkManager {
     this.hasMoreData = true;
     this.searchQuery = '';
 
+    // 主题颜色常量
+    this.THEME_COLORS = {
+      red: '#ef4444',
+      orange: '#f97316',
+      yellow: '#eab308',
+      green: '#22c55e',
+      cyan: '#06b6d4',
+      blue: '#3b82f6',
+      purple: '#8b5cf6'
+    };
+
     this.initializeElements();
     this.bindEvents();
     this.initializeTheme();
@@ -123,13 +134,7 @@ class BookmarkManager {
 
     // 页面滚动事件 - 滚动时立即隐藏菜单和tooltip
     this.elements.bookmarksContainer.addEventListener('scroll', () => {
-      if (this.menuVisible) {
-        this.hideContextMenuImmediately();
-      }
-      // 滚动时也隐藏tooltip
-      if (this.tooltipVisible) {
-        this.hideUrlTooltipImmediate();
-      }
+      this.hideAllPopups();
     });
 
     // 全局鼠标事件 - 用于tooltip跟踪
@@ -184,24 +189,7 @@ class BookmarkManager {
   }
 
   async setThemeColor(colorName) {
-    const colorMap = {
-      // 赤
-      red: '#ef4444',
-      // 橙
-      orange: '#f97316',
-      // 黄
-      yellow: '#eab308',
-      // 绿
-      green: '#22c55e',
-      // 青
-      cyan: '#06b6d4',
-      // 蓝
-      blue: '#3b82f6',
-      // 紫
-      purple: '#8b5cf6'
-    };
-
-    const color = colorMap[colorName] || colorMap.blue;
+    const color = this.THEME_COLORS[colorName] || this.THEME_COLORS.blue;
     const root = document.documentElement;
 
     // 设置主题颜色CSS变量，影响多个元素
@@ -262,57 +250,29 @@ class BookmarkManager {
       '关闭鼠标悬停显示URL' : '开启鼠标悬停显示URL';
   }
 
+  // 统一隐藏所有弹窗
+  hideAllPopups() {
+    if (this.menuVisible) {
+      this.hideContextMenuImmediately();
+    }
+    if (this.tooltipVisible) {
+      this.hideUrlTooltipImmediate();
+    }
+  }
+
   updateThemeColorUI(colorName) {
     this.updateColorUI('.theme-color-preset', colorName);
   }
 
   setScrollbarColorByTheme(colorName) {
-    const colorMap = {
-      // 赤
-      red: {
-        track: 'rgba(239, 68, 68, 0.1)',
-        thumb: 'rgba(239, 68, 68, 0.6)',
-        thumbHover: 'rgba(220, 38, 38, 0.8)'
-      },
-      // 橙
-      orange: {
-        track: 'rgba(249, 115, 22, 0.1)',
-        thumb: 'rgba(249, 115, 22, 0.6)',
-        thumbHover: 'rgba(234, 88, 12, 0.8)'
-      },
-      // 黄
-      yellow: {
-        track: 'rgba(234, 179, 8, 0.1)',
-        thumb: 'rgba(234, 179, 8, 0.6)',
-        thumbHover: 'rgba(202, 138, 4, 0.8)'
-      },
-      // 绿
-      green: {
-        track: 'rgba(34, 197, 94, 0.1)',
-        thumb: 'rgba(34, 197, 94, 0.6)',
-        thumbHover: 'rgba(22, 163, 74, 0.8)'
-      },
-      // 青
-      cyan: {
-        track: 'rgba(6, 182, 212, 0.1)',
-        thumb: 'rgba(6, 182, 212, 0.6)',
-        thumbHover: 'rgba(8, 145, 178, 0.8)'
-      },
-      // 蓝
-      blue: {
-        track: 'rgba(59, 130, 246, 0.1)',
-        thumb: 'rgba(59, 130, 246, 0.6)',
-        thumbHover: 'rgba(37, 99, 235, 0.8)'
-      },
-      // 紫
-      purple: {
-        track: 'rgba(139, 92, 246, 0.1)',
-        thumb: 'rgba(139, 92, 246, 0.6)',
-        thumbHover: 'rgba(124, 58, 237, 0.8)'
-      }
-    };
+    const baseColor = this.THEME_COLORS[colorName] || this.THEME_COLORS.blue;
 
-    const colors = colorMap[colorName] || colorMap.blue;
+    // 使用现有的hexToRgba方法生成颜色
+    const colors = {
+      track: this.hexToRgba(baseColor, 0.1),
+      thumb: this.hexToRgba(baseColor, 0.6),
+      thumbHover: this.hexToRgba(baseColor, 0.8)
+    };
     const root = document.documentElement;
 
     // 深色主题需要调整颜色
@@ -1287,8 +1247,6 @@ class BookmarkManager {
       // 重新渲染书签列表
       this.elements.bookmarksList.innerHTML = '';
       this.renderBookmarks(true);
-
-      console.log('书签删除成功');
     } catch (error) {
       console.error('删除书签失败:', error);
     }
