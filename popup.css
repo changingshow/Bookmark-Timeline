@@ -942,7 +942,6 @@ body {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
-  vertical-align: middle; /* 确保垂直对齐稳定 */
   display: block; /* 避免inline元素的基线对齐问题 */
 }
 
@@ -1018,6 +1017,13 @@ body {
   right: 10px; /* 固定右边距 */
   width: auto; /* 自动宽度 */
   max-width: none; /* 移除最大宽度限制，由left和right控制 */
+}
+
+/* 短URL时的自适应宽度样式 */
+.url-tooltip.short-url {
+  right: auto; /* 取消固定右边距 */
+  max-width: 300px; /* 设置最大宽度防止过宽 */
+  min-width: 60px; /* 设置最小宽度 */
 }
 
 /* 深色主题下保持相同的深色背景 */

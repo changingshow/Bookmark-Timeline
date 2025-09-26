@@ -1408,16 +1408,20 @@ class BookmarkManager {
 
     const tooltip = this.elements.urlTooltip;
 
+    // 判断是否为短URL（长度小于40且不包含换行符）
+    const isShortUrl = url.length < 40 && !url.includes('\n');
+    tooltip.classList.toggle('short-url', isShortUrl);
+
     // 先显示tooltip以便获取正确的尺寸
     tooltip.classList.add('visible');
     this.tooltipVisible = true;
 
     // 基于书签元素位置计算固定位置
-    this.calculateFixedTooltipPosition();
+    this.calculateFixedTooltipPosition(isShortUrl);
   }
 
   // 计算tooltip的固定位置（基于书签元素）
-  calculateFixedTooltipPosition() {
+  calculateFixedTooltipPosition(isShortUrl = false) {
     if (!this.elements.urlTooltip || !this.currentHoveredBookmarkElement) {
       return;
     }
@@ -1461,8 +1465,11 @@ class BookmarkManager {
     // 转换为相对于容器的位置
     const relativeTop = tooltipTop - containerRect.top;
 
-    // 设置最终位置
+    // 设置垂直位置
     tooltip.style.top = `${relativeTop}px`;
+
+    // 短URL设置固定左侧距离，长URL清除left设置使用CSS默认值
+    tooltip.style.left = isShortUrl ? '10px' : '';
   }
 
   // 隐藏URL提示框
