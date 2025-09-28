@@ -872,8 +872,8 @@ body {
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   padding: 0; /* 移除上下间距，消除割裂感 */
-  min-width: 200px;
-  max-width: 260px; /* 减小最大宽度，为滚动条留更多空间 */
+  min-width: 140px;
+  max-width: 200px; /* 进一步减小宽度，使菜单更紧凑 */
   z-index: 10000;
   opacity: 0;
   visibility: hidden;
@@ -966,33 +966,7 @@ body {
   transition: color 0.15s ease;
 }
 
-/* 为"所在目录"菜单项添加箭头指示器 */
-.context-menu-item:first-child:hover::after {
-  content: '→';
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--button-color); /* 使用主题按钮颜色，更明显 */
-  font-weight: 900; /* 更加粗体 */
-  font-size: 16px; /* 增大字体 */
-  opacity: 1; /* 完全不透明，更明显 */
-  animation: slideIn 0.2s ease;
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.1); /* 添加轻微阴影增加对比度 */
-  pointer-events: none; /* 确保箭头不会影响鼠标事件 */
-  will-change: transform, opacity; /* 优化动画性能 */
-}
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-50%) translateX(-4px); /* 减少移动距离，移除scale避免布局影响 */
-  }
-  to {
-    opacity: 1; /* 完全不透明 */
-    transform: translateY(-50%) translateX(0); /* 正常位置 */
-  }
-}
 
 /* URL悬停提示框样式 */
 .url-tooltip {
@@ -1044,4 +1018,97 @@ body {
   word-break: break-all;
   word-wrap: break-word;
   white-space: normal;
+}
+
+/* 右键菜单箭头样式 */
+.context-menu-item.with-arrow::after {
+  content: '→';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--button-color);
+  font-weight: 900;
+  font-size: 16px;
+  opacity: 0;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.context-menu-item.with-arrow:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* 复制成功提示样式 */
+.copy-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(34, 197, 94, 0.95);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 10002;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(-10px);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.copy-toast.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.copy-toast svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* 删除成功提示样式 */
+.delete-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(239, 68, 68, 0.95);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 10002;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(-10px);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.delete-toast.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.delete-toast svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }

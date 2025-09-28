@@ -160,14 +160,17 @@
 
     <!-- 右键菜单 -->
     <div class="context-menu" id="contextMenu">
-        <button class="context-menu-item" id="showFolderItem">
+        <button class="context-menu-item" id="copyUrlItem">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
+            </svg>
+            <div class="menu-text">复制URL</div>
+        </button>
+        <button class="context-menu-item with-arrow" id="showFolderItem">
             <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/>
             </svg>
-            <div class="menu-text">
-                <div>所在目录</div>
-                <div class="folder-path" id="folderPath">加载中...</div>
-            </div>
+            <div class="menu-text">跳转书签栏</div>
         </button>
         <button class="context-menu-item danger" id="deleteBookmarkItem">
             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -180,6 +183,22 @@
     <!-- URL悬停提示框 -->
     <div class="url-tooltip" id="urlTooltip">
         <div class="url-tooltip-content" id="urlTooltipContent"></div>
+    </div>
+
+    <!-- 复制成功提示 -->
+    <div class="copy-toast" id="copyToast">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+        </svg>
+        <span>URL已复制到剪贴板</span>
+    </div>
+
+    <!-- 删除成功提示 -->
+    <div class="delete-toast" id="deleteToast">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+        </svg>
+        <span>书签已删除</span>
     </div>
 
     <script src="popup.js"></script>

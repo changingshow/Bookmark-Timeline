@@ -46,12 +46,14 @@ class BookmarkManager {
       managerButton: document.getElementById('managerButton'),
       backToTop: document.getElementById('backToTop'),
       contextMenu: document.getElementById('contextMenu'),
+      copyUrlItem: document.getElementById('copyUrlItem'),
       showFolderItem: document.getElementById('showFolderItem'),
       deleteBookmarkItem: document.getElementById('deleteBookmarkItem'),
-      folderPath: document.getElementById('folderPath'),
       urlTooltip: document.getElementById('urlTooltip'),
       urlTooltipContent: document.getElementById('urlTooltipContent'),
-      urlToggle: document.getElementById('urlToggle')
+      urlToggle: document.getElementById('urlToggle'),
+      copyToast: document.getElementById('copyToast'),
+      deleteToast: document.getElementById('deleteToast')
     };
 
     // 初始化右键菜单相关变量
@@ -120,6 +122,7 @@ class BookmarkManager {
     });
 
     // 右键菜单事件
+    this.elements.copyUrlItem.addEventListener('click', () => this.copyBookmarkUrl());
     this.elements.showFolderItem.addEventListener('click', () => this.showBookmarkFolder());
     this.elements.deleteBookmarkItem.addEventListener('click', () => this.deleteBookmark());
 
@@ -782,9 +785,6 @@ class BookmarkManager {
       // 设置当前选中的书签
       this.currentContextBookmark = bookmark;
 
-      // 获取并显示书签所在目录
-      await this.updateFolderPath(bookmark.parentId);
-
       // 获取书签项目元素 - 多重回退策略
       let bookmarkElement = e.currentTarget;
 
@@ -1180,41 +1180,7 @@ class BookmarkManager {
     }
   }
 
-  // 获取并更新书签所在目录路径
-  async updateFolderPath(parentId) {
-    try {
-      const folderPath = await this.getBookmarkFolderPath(parentId);
-      this.elements.folderPath.textContent = folderPath;
-    } catch (error) {
-      console.error('获取目录路径失败:', error);
-      this.elements.folderPath.textContent = '未知目录';
-    }
-  }
 
-  // 递归获取书签目录路径
-  async getBookmarkFolderPath(folderId) {
-    if (!folderId || folderId === '0') {
-      return '书签栏';
-    }
-
-    try {
-      const folders = await chrome.bookmarks.get(folderId);
-      if (folders.length === 0) {
-        return '未知目录';
-      }
-
-      const folder = folders[0];
-      if (!folder.parentId || folder.parentId === '0') {
-        return folder.title || '书签栏';
-      }
-
-      const parentPath = await this.getBookmarkFolderPath(folder.parentId);
-      return `${parentPath} > ${folder.title}`;
-    } catch (error) {
-      console.error('获取目录信息失败:', error);
-      return '未知目录';
-    }
-  }
 
   // 显示书签所在目录（在书签管理器中）
   async showBookmarkFolder() {
@@ -1232,6 +1198,76 @@ class BookmarkManager {
     this.hideContextMenu();
   }
 
+  // 复制书签URL
+  async copyBookmarkUrl() {
+    if (!this.currentContextBookmark) return;
+
+    try {
+      // 使用Clipboard API复制URL
+      await navigator.clipboard.writeText(this.currentContextBookmark.url);
+
+      // 显示复制成功提示
+      this.showCopyToast();
+    } catch (error) {
+      console.error('复制URL失败:', error);
+
+      // 回退方案：使用传统的复制方法
+      try {
+        this.fallbackCopyUrl(this.currentContextBookmark.url);
+        this.showCopyToast();
+      } catch (fallbackError) {
+        console.error('回退复制方法也失败:', fallbackError);
+        // 复制失败时不显示提示，避免误导用户
+      }
+    }
+
+    this.hideContextMenu();
+  }
+
+  // 回退复制方法（兼容性）
+  fallbackCopyUrl(url) {
+    const textArea = document.createElement('textarea');
+    textArea.value = url;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    if (!document.execCommand('copy')) {
+      throw new Error('execCommand copy failed');
+    }
+
+    document.body.removeChild(textArea);
+  }
+
+  // 显示复制成功提示
+  showCopyToast() {
+    const toast = this.elements.copyToast;
+
+    // 显示提示
+    toast.classList.add('visible');
+
+    // 0.8秒后自动隐藏
+    setTimeout(() => {
+      toast.classList.remove('visible');
+    }, 800);
+  }
+
+  // 显示删除成功提示
+  showDeleteToast() {
+    const toast = this.elements.deleteToast;
+
+    // 显示提示
+    toast.classList.add('visible');
+
+    // 0.8秒后自动隐藏
+    setTimeout(() => {
+      toast.classList.remove('visible');
+    }, 800);
+  }
+
   // 删除书签
   async deleteBookmark() {
     if (!this.currentContextBookmark) return;
@@ -1247,6 +1283,9 @@ class BookmarkManager {
       // 重新渲染书签列表
       this.elements.bookmarksList.innerHTML = '';
       this.renderBookmarks(true);
+
+      // 显示删除成功提示
+      this.showDeleteToast();
     } catch (error) {
       console.error('删除书签失败:', error);
     }
