@@ -16,8 +16,7 @@
   --scrollbar-track: rgba(0, 0, 0, 0.05);
   --scrollbar-thumb: rgba(0, 0, 0, 0.2);
   --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
-  --button-color: #667eea;
-  --title-color: #667eea;
+  --accent-primary: #667eea;
   --focus-shadow-color: rgba(102, 126, 234, 0.1);
 }
 
@@ -101,10 +100,8 @@ body {
   gap: 8px;
   font-size: 18px;
   font-weight: 600;
-  color: var(--title-color);
+  color: var(--accent-primary);
 }
-
-
 
 .header-actions {
   display: flex;
@@ -147,9 +144,9 @@ body {
 
 /* URL按钮开启状态 */
 #urlToggle.active {
-  background: var(--button-color);
+  background: var(--accent-primary);
   color: white;
-  border-color: var(--button-color);
+  border-color: var(--accent-primary);
 }
 
 /* URL按钮关闭状态 */
@@ -161,7 +158,7 @@ body {
 
 /* URL按钮悬停效果 */
 #urlToggle.active:hover {
-  background: var(--button-color);
+  background: var(--accent-primary);
   opacity: 0.9;
   transform: translateY(-1px);
 }
@@ -202,7 +199,7 @@ body {
 }
 
 .search-input:focus {
-  border-color: var(--button-color);
+  border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px var(--focus-shadow-color);
 }
 
@@ -304,8 +301,6 @@ body {
 .color-group {
   margin-bottom: 8px;
 }
-
-
 
 .color-presets {
   display: flex;
@@ -558,30 +553,6 @@ body {
 }
 
 
-
-/* 首字母图标容器 */
-.site-initial-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* 首字母文字 */
-.site-initial-icon .site-initial {
-  color: white;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
 /* 图标状态样式 */
 .bookmark-icon.fallback,
 .bookmark-icon.success {
@@ -600,7 +571,7 @@ body {
   height: 16px;
   margin: auto;
   border: 2px solid #e2e8f0;
-  border-top: 2px solid var(--button-color);
+  border-top: 2px solid var(--accent-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   z-index: 10;
@@ -610,7 +581,7 @@ body {
 /* 深色主题下的加载动画 */
 [data-theme="dark"] .bookmark-icon-wrapper.loading::before {
   border: 2px solid #4a5568;
-  border-top: 2px solid var(--button-color);
+  border-top: 2px solid var(--accent-primary);
 }
 
 /* 加载时隐藏内部内容 */
@@ -668,7 +639,7 @@ body {
   justify-content: center;
   gap: 8px;
   padding: 15px;
-  color: var(--button-color);
+  color: var(--accent-primary);
   font-size: 14px;
   background: transparent;
   border-bottom: 1px solid var(--border-color);
@@ -680,7 +651,7 @@ body {
   width: 22px;
   height: 22px;
   border: 2px solid #e2e8f0;
-  border-top: 2px solid var(--button-color);
+  border-top: 2px solid var(--accent-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -758,7 +729,7 @@ body {
 .manager-button {
   width: 100%;
   height: 32px;
-  background: var(--button-color);
+  background: var(--accent-primary);
   color: white;
   border: none;
   border-radius: 8px;
@@ -789,7 +760,7 @@ body {
   right: 12px;
   width: 32px;
   height: 32px;
-  background: var(--button-color);
+  background: var(--accent-primary);
   color: white;
   border: none;
   border-radius: 50%;
@@ -1027,7 +998,7 @@ body {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--button-color);
+  color: var(--accent-primary);
   font-weight: 900;
   font-size: 16px;
   opacity: 0;

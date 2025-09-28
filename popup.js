@@ -19,6 +19,10 @@ class BookmarkManager {
       purple: '#8b5cf6'
     };
 
+    // UI常量
+    this.SCROLLBAR_WIDTH = 20;
+    this.SKELETON_COUNT = 5;
+
     this.initializeElements();
     this.bindEvents();
     this.initializeTheme();
@@ -195,9 +199,8 @@ class BookmarkManager {
     const color = this.THEME_COLORS[colorName] || this.THEME_COLORS.blue;
     const root = document.documentElement;
 
-    // 设置主题颜色CSS变量，影响多个元素
-    root.style.setProperty('--button-color', color);
-    root.style.setProperty('--title-color', color);
+    // 设置主题颜色CSS变量
+    root.style.setProperty('--accent-primary', color);
 
     // 设置焦点阴影颜色（带透明度）
     const focusShadowColor = this.hexToRgba(color, 0.1);
@@ -263,12 +266,21 @@ class BookmarkManager {
     }
   }
 
+  // 通用的颜色UI更新方法
+  updateColorUI(selector, colorName) {
+    const presets = document.querySelectorAll(selector);
+    presets.forEach(preset => {
+      preset.classList.toggle('active', preset.dataset.color === colorName);
+    });
+  }
+
   updateThemeColorUI(colorName) {
     this.updateColorUI('.theme-color-preset', colorName);
   }
 
   setScrollbarColorByTheme(colorName) {
     const baseColor = this.THEME_COLORS[colorName] || this.THEME_COLORS.blue;
+    const root = document.documentElement;
 
     // 使用现有的hexToRgba方法生成颜色
     const colors = {
@@ -276,7 +288,6 @@ class BookmarkManager {
       thumb: this.hexToRgba(baseColor, 0.6),
       thumbHover: this.hexToRgba(baseColor, 0.8)
     };
-    const root = document.documentElement;
 
     // 深色主题需要调整颜色
     const currentTheme = root.getAttribute('data-theme');
@@ -290,15 +301,6 @@ class BookmarkManager {
     root.style.setProperty('--scrollbar-thumb', colors.thumb);
     root.style.setProperty('--scrollbar-thumb-hover', colors.thumbHover);
   }
-
-  // 通用的颜色UI更新方法
-  updateColorUI(selector, colorName) {
-    const presets = document.querySelectorAll(selector);
-    presets.forEach(preset => {
-      preset.classList.toggle('active', preset.dataset.color === colorName);
-    });
-  }
-
 
   clearSearch() {
     this.elements.searchInput.value = '';
@@ -552,27 +554,23 @@ class BookmarkManager {
   createBookmarkIcon(url) {
     // 创建外层灰色圆角矩形容器
     const iconWrapper = document.createElement('div');
-    // 同时添加loading类
     iconWrapper.className = 'bookmark-icon-wrapper loading';
 
     // 创建内层图标容器
     const iconContainer = document.createElement('div');
     iconContainer.className = 'bookmark-icon loading';
 
-    // 解析URL获取域名和网站名称
-    let hostname, siteName;
+    // 解析URL获取域名
+    let hostname;
     try {
       const urlObj = new URL(url);
       hostname = urlObj.hostname;
-      // 移除www前缀
-      siteName = hostname.replace(/^www\./, '');
     } catch (e) {
       hostname = 'unknown';
-      siteName = 'unknown';
     }
 
     const img = document.createElement('img');
-    const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
+    const faviconUrl = `https://www.google1.com/s2/favicons?domain=${hostname}&sz=32`;
 
     // 设置加载超时时间（毫秒）
     const LOAD_TIMEOUT = 1000;
@@ -584,7 +582,6 @@ class BookmarkManager {
       if (!isLoaded) {
         isLoaded = true;
         clearTimeout(timeoutId);
-        // 移除wrapper的loading类
         iconWrapper.classList.remove('loading');
         iconContainer.classList.remove('loading');
         iconContainer.classList.remove('error');
@@ -597,9 +594,8 @@ class BookmarkManager {
       if (!isLoaded) {
         isLoaded = true;
         clearTimeout(timeoutId);
-        // 移除wrapper的loading类
         iconWrapper.classList.remove('loading');
-        this.showFallbackIcon(iconContainer, siteName);
+        this.showDefaultIcon(iconContainer);
       }
     };
 
@@ -607,11 +603,9 @@ class BookmarkManager {
     timeoutId = setTimeout(() => {
       if (!isLoaded) {
         isLoaded = true;
-        // 停止图片加载
         img.src = '';
-        // 移除wrapper的loading类
         iconWrapper.classList.remove('loading');
-        this.showFallbackIcon(iconContainer, siteName);
+        this.showDefaultIcon(iconContainer);
       }
     }, LOAD_TIMEOUT);
 
@@ -625,51 +619,13 @@ class BookmarkManager {
     return iconWrapper;
   }
 
-  // 显示降级图标（网站首字母）
-  showFallbackIcon(iconContainer, siteName) {
+  // 显示默认图标
+  showDefaultIcon(iconContainer) {
     iconContainer.classList.remove('loading');
     iconContainer.classList.add('fallback');
-    
-    // 获取网站首字母
-    const initial = this.getSiteInitial(siteName);
-    
-    // 生成颜色（根据域名生成一致的颜色）
-    const bgColor = this.generateColorFromText(siteName);
-    
     iconContainer.innerHTML = `
-      <div class="site-initial-icon" style="background-color: ${bgColor}">
-        <span class="site-initial">${initial}</span>
-      </div>
+      <img src="icons/earth1.png" alt="默认图标" style="width: 100%; height: 100%; object-fit: cover;">
     `;
-  }
-
-  // 获取网站首字母
-  getSiteInitial(siteName) {
-    const customInitials = {
-      'github.com': 'G', 'stackoverflow.com': 'SO', 'google.com': 'G',
-      'baidu.com': '百', 'zhihu.com': '知', 'bilibili.com': 'B',
-      'youtube.com': 'Y', 'twitter.com': 'T', 'facebook.com': 'F',
-      'linkedin.com': 'in'
-    };
-
-    return customInitials[siteName] || siteName.split('.')[0].charAt(0).toUpperCase();
-  }
-
-  // 根据文本生成一致的颜色
-  generateColorFromText(text) {
-    const colors = [
-      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-      '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
-      '#F8C471', '#82E0AA', '#F1948A', '#D2B4DE'
-    ];
-
-    let hash = 0;
-    for (let i = 0; i < text.length; i++) {
-      hash = ((hash << 5) - hash) + text.charCodeAt(i);
-      hash = hash & hash;
-    }
-
-    return colors[Math.abs(hash) % colors.length];
   }
 
   createBookmarkContent(bookmark) {
@@ -849,11 +805,27 @@ class BookmarkManager {
     }
   }
 
-
-
   showSkeleton() {
+    this.elements.skeletonContainer.innerHTML = '';
+    for (let i = 0; i < this.SKELETON_COUNT; i++) {
+      const skeletonItem = this.createSkeletonItem();
+      this.elements.skeletonContainer.appendChild(skeletonItem);
+    }
     this.elements.skeletonContainer.classList.remove('hidden');
     this.elements.bookmarksContainer.classList.add('hidden');
+  }
+
+  createSkeletonItem() {
+    const item = document.createElement('div');
+    item.className = 'skeleton-item';
+    item.innerHTML = `
+      <div class="skeleton-icon"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-date"></div>
+      </div>
+    `;
+    return item;
   }
 
   hideSkeleton() {
@@ -996,8 +968,8 @@ class BookmarkManager {
     const menuWidth = menuRect.width;
     const menuHeight = menuRect.height;
 
-    // 滚动条宽度（6px + 更多额外边距确保不遮盖）
-    const scrollbarWidth = 20;
+    // 滚动条宽度
+    const scrollbarWidth = this.SCROLLBAR_WIDTH;
 
     // 计算可用宽度（减去滚动条宽度）
     const availableWidth = container.offsetWidth - scrollbarWidth;
@@ -1108,8 +1080,8 @@ class BookmarkManager {
       let menuLeft = x - containerRect.left;
       let menuTop = y - containerRect.top;
 
-      // 滚动条宽度（6px + 更多额外边距确保不遮盖）
-      const scrollbarWidth = 20;
+      // 滚动条宽度
+      const scrollbarWidth = this.SCROLLBAR_WIDTH;
 
       // 计算可用宽度（减去滚动条宽度）
       const availableWidth = container.offsetWidth - scrollbarWidth;
