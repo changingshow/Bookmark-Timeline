@@ -2,6 +2,8 @@
 .codebuddy/
 .codebuddy/*
 
+.claude/
+
 # 开发工具和编辑器
 .vscode/
 .idea/

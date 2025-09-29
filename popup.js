@@ -570,7 +570,7 @@ class BookmarkManager {
     }
 
     const img = document.createElement('img');
-    const faviconUrl = `https://www.google1.com/s2/favicons?domain=${hostname}&sz=32`;
+    const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
 
     // 设置加载超时时间（毫秒）
     const LOAD_TIMEOUT = 1000;
