@@ -24,6 +24,39 @@ class BookmarkManager {
     this.SKELETON_COUNT = 5;
     this.BUTTON_TOOLTIP_DELAY = 100; // 按钮tooltip显示延迟（毫秒）
 
+    // 时间常量
+    this.URL_TOOLTIP_DELAY = 50; // URL tooltip显示延迟（毫秒）
+    this.CONTEXT_MENU_HIDE_DELAY = 300; // 右键菜单隐藏延迟（毫秒）
+    this.TOAST_DURATION = 800; // 提示消息显示时长（毫秒）
+    this.BACK_TO_TOP_THRESHOLD = 200; // 回到顶部按钮显示阈值（像素）
+    this.THROTTLE_DELAY = 16; // 节流延迟时间（毫秒，60fps）
+
+    // 尺寸常量
+    this.TOOLTIP_MARGIN = 8; // tooltip边距（像素）
+    this.MENU_MARGIN = 8; // 菜单边距（像素）
+    this.ICON_LOAD_TIMEOUT = 1000; // 图标加载超时时间（毫秒）
+
+    // 节流函数
+    this.throttle = (func, delay) => {
+      let timeoutId;
+      let lastExecTime = 0;
+
+      return (...args) => {
+        const currentTime = Date.now();
+
+        if (currentTime - lastExecTime > delay) {
+          func.apply(this, args);
+          lastExecTime = currentTime;
+        } else {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            func.apply(this, args);
+            lastExecTime = Date.now();
+          }, delay - (currentTime - lastExecTime));
+        }
+      };
+    };
+
     this.initializeElements();
     this.bindEvents();
     this.initializeTheme();
@@ -81,6 +114,46 @@ class BookmarkManager {
     // 初始化按钮提示框相关变量
     this.buttonTooltipTimer = null;
     this.buttonTooltipVisible = false;
+
+    // 创建节流处理的鼠标移动事件处理器
+    this.throttledGlobalMouseMove = this.throttle(this.handleGlobalMouseMove.bind(this), this.THROTTLE_DELAY);
+  }
+
+  // 组件销毁时的清理方法
+  destroy() {
+    // 清理所有定时器
+    this.clearTooltipTimer();
+    this.clearButtonTooltipTimer();
+
+    if (this.hideTimer) {
+      clearTimeout(this.hideTimer);
+      this.hideTimer = null;
+    }
+
+    if (this.backToTopTimer) {
+      clearTimeout(this.backToTopTimer);
+      this.backToTopTimer = null;
+    }
+
+    // 移除所有事件监听器
+    this.removeEventListeners();
+  }
+
+  // 移除所有事件监听器
+  removeEventListeners() {
+    // 移除全局事件监听器
+    document.removeEventListener('keydown', this.handleKeyNavigation);
+    document.removeEventListener('click', this.handleGlobalClick);
+    document.removeEventListener('mousemove', this.handleMouseMove);
+
+    // 移除按钮tooltip事件监听器
+    const buttonsWithTooltip = document.querySelectorAll('[data-tooltip]');
+    buttonsWithTooltip.forEach(button => {
+      button.removeEventListener('mouseenter', this.showButtonTooltip);
+      button.removeEventListener('mouseleave', this.hideButtonTooltip);
+      button.removeEventListener('mousedown', this.hideButtonTooltip);
+      button.removeEventListener('touchstart', this.hideButtonTooltip);
+    });
   }
 
   bindEvents() {
@@ -154,8 +227,8 @@ class BookmarkManager {
       this.hideAllPopups();
     });
 
-    // 全局鼠标事件 - 用于tooltip跟踪
-    this.elements.bookmarksContainer.addEventListener('mousemove', (e) => this.handleGlobalMouseMove(e));
+    // 全局鼠标事件 - 用于tooltip跟踪（使用节流优化性能）
+    this.elements.bookmarksContainer.addEventListener('mousemove', this.throttledGlobalMouseMove);
     this.elements.bookmarksContainer.addEventListener('mouseleave', () => this.handleGlobalMouseLeave());
   }
 
@@ -371,7 +444,7 @@ class BookmarkManager {
         if (this.elements.searchInput) {
           this.elements.searchInput.focus();
         }
-      }, 100);
+      }, this.BUTTON_TOOLTIP_DELAY);
 
     } catch (error) {
       console.error('加载书签失败:', error);
@@ -681,8 +754,27 @@ class BookmarkManager {
 
 
   highlightSearchTerm(text, searchTerm) {
-    const regex = new RegExp(`(${searchTerm})`, 'gi');
-    return text.replace(regex, '<span class="highlight">$1</span>');
+    // 安全的HTML转义函数
+    const escapeHtml = (str) => {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    };
+
+    // 转义正则表达式特殊字符
+    const escapeRegex = (str) => {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    };
+
+    // 先转义HTML
+    const escapedText = escapeHtml(text);
+    const escapedTerm = escapeHtml(searchTerm);
+
+    // 创建安全的正则表达式
+    const regex = new RegExp(`(${escapeRegex(escapedTerm)})`, 'gi');
+
+    // 进行高亮替换
+    return escapedText.replace(regex, '<span class="highlight">$1</span>');
   }
 
   formatDate(timestamp) {
@@ -736,7 +828,7 @@ class BookmarkManager {
     this.elements.loadingIndicator.classList.remove('hidden');
     
     // 模拟加载延迟
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(resolve, this.TOAST_DURATION));
     
     this.renderBookmarks();
     
