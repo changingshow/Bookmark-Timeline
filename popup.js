@@ -22,6 +22,7 @@ class BookmarkManager {
     // UI常量
     this.SCROLLBAR_WIDTH = 20;
     this.SKELETON_COUNT = 5;
+    this.BUTTON_TOOLTIP_DELAY = 100; // 按钮tooltip显示延迟（毫秒）
 
     this.initializeElements();
     this.bindEvents();
@@ -57,7 +58,9 @@ class BookmarkManager {
       urlTooltipContent: document.getElementById('urlTooltipContent'),
       urlToggle: document.getElementById('urlToggle'),
       copyToast: document.getElementById('copyToast'),
-      deleteToast: document.getElementById('deleteToast')
+      deleteToast: document.getElementById('deleteToast'),
+      buttonTooltip: document.getElementById('buttonTooltip'),
+      buttonTooltipContent: document.getElementById('buttonTooltipContent')
     };
 
     // 初始化右键菜单相关变量
@@ -74,9 +77,16 @@ class BookmarkManager {
     this.currentHoveredBookmark = null;
     this.currentHoveredBookmarkElement = null;
     this.urlDisplayEnabled = false; // URL显示功能开关状态，默认关闭
+
+    // 初始化按钮提示框相关变量
+    this.buttonTooltipTimer = null;
+    this.buttonTooltipVisible = false;
   }
 
   bindEvents() {
+    // 按钮tooltip事件
+    this.initializeButtonTooltips();
+
     // GitHub按钮
     this.elements.githubButton.addEventListener('click', () => this.openGitHub());
 
@@ -252,8 +262,10 @@ class BookmarkManager {
   // 更新URL开关按钮的UI状态
   updateUrlToggleUI() {
     this.elements.urlToggle.classList.toggle('active', this.urlDisplayEnabled);
-    this.elements.urlToggle.title = this.urlDisplayEnabled ?
+    // 更新自定义tooltip文本
+    const tooltipText = this.urlDisplayEnabled ?
       '关闭鼠标悬停显示URL' : '开启鼠标悬停显示URL';
+    this.elements.urlToggle.setAttribute('data-tooltip', tooltipText);
   }
 
   // 统一隐藏所有弹窗
@@ -263,6 +275,9 @@ class BookmarkManager {
     }
     if (this.tooltipVisible) {
       this.hideUrlTooltipImmediate();
+    }
+    if (this.buttonTooltipVisible) {
+      this.hideButtonTooltip();
     }
   }
 
@@ -1503,6 +1518,107 @@ class BookmarkManager {
     this.tooltipVisible = false;
     this.clearBookmarkState();
     this.clearTooltipTimer();
+  }
+
+  // 初始化按钮提示框
+  initializeButtonTooltips() {
+    const buttonsWithTooltip = document.querySelectorAll('[data-tooltip]');
+
+    buttonsWithTooltip.forEach(button => {
+      button.addEventListener('mouseenter', (e) => this.showButtonTooltip(e));
+      button.addEventListener('mouseleave', () => this.hideButtonTooltip());
+      // 点击时立即隐藏tooltip
+      button.addEventListener('mousedown', () => this.hideButtonTooltip());
+      // 确保触摸设备上也能隐藏
+      button.addEventListener('touchstart', () => this.hideButtonTooltip());
+    });
+  }
+
+  // 显示按钮提示框
+  showButtonTooltip(e) {
+    const button = e.currentTarget;
+    const tooltipText = button.getAttribute('data-tooltip');
+
+    if (!tooltipText || !this.elements.buttonTooltip) return;
+
+    // 清除之前的定时器
+    this.clearButtonTooltipTimer();
+
+    // 设置提示内容
+    this.elements.buttonTooltipContent.textContent = tooltipText;
+
+    // 延迟显示
+    this.buttonTooltipTimer = setTimeout(() => {
+      this.positionButtonTooltip(button);
+      this.elements.buttonTooltip.classList.add('visible');
+      this.buttonTooltipVisible = true;
+    }, this.BUTTON_TOOLTIP_DELAY); // 使用可配置的延迟时间
+  }
+
+  // 定位按钮提示框
+  positionButtonTooltip(button) {
+    const tooltip = this.elements.buttonTooltip;
+    const container = this.elements.container;
+
+    // 获取按钮和容器位置
+    const buttonRect = button.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    // 计算相对位置
+    const buttonCenterX = buttonRect.left + buttonRect.width / 2 - containerRect.left;
+    const buttonBottom = buttonRect.bottom - containerRect.top;
+
+    // 先显示tooltip以获取尺寸
+    tooltip.style.visibility = 'hidden';
+    tooltip.style.opacity = '0';
+    tooltip.style.display = 'block';
+
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const tooltipWidth = tooltipRect.width;
+    const tooltipHeight = tooltipRect.height;
+
+    // 计算最终位置
+    let left = buttonCenterX - tooltipWidth / 2;
+    let top = buttonBottom + 8; // 按钮下方8px
+
+    // 防止超出容器边界
+    const margin = 8;
+    if (left < margin) {
+      left = margin;
+    } else if (left + tooltipWidth > container.offsetWidth - margin) {
+      left = container.offsetWidth - tooltipWidth - margin;
+    }
+
+    // 如果下方空间不足，显示在按钮上方
+    if (top + tooltipHeight > container.offsetHeight - margin) {
+      top = buttonRect.top - containerRect.top - tooltipHeight - 8;
+    }
+
+    // 应用位置
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    tooltip.style.visibility = '';
+    tooltip.style.opacity = '';
+    tooltip.style.display = '';
+  }
+
+  // 隐藏按钮提示框
+  hideButtonTooltip() {
+    // 立即清除显示定时器
+    this.clearButtonTooltipTimer();
+
+    if (this.buttonTooltipVisible && this.elements.buttonTooltip) {
+      this.elements.buttonTooltip.classList.remove('visible');
+      this.buttonTooltipVisible = false;
+    }
+  }
+
+  // 清除按钮提示框定时器
+  clearButtonTooltipTimer() {
+    if (this.buttonTooltipTimer) {
+      clearTimeout(this.buttonTooltipTimer);
+      this.buttonTooltipTimer = null;
+    }
   }
 }
 
